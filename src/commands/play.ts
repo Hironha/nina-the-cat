@@ -1,13 +1,15 @@
-import { type Command, type Message } from '@utils/command';
+import { Command, type CacheType, type ChatInputCommandInteraction } from '@utils/command';
 
-class Play implements Command {
-	public name = 'play';
-	public description = 'command to play a song';
+class Play extends Command {
+	constructor() {
+		super();
+	}
 
-	public execute<InGuild extends boolean = boolean>(message: Message<InGuild>) {
-		console.log(message);
+	execute<Cached extends CacheType = CacheType>(interaction: ChatInputCommandInteraction<Cached>) {}
+
+	build() {
+		return this.setName('play').setDescription('Attempt to play a song');
 	}
 }
 
-export default new Play();
-	
+export default new Play().build();

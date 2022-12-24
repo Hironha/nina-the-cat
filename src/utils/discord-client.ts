@@ -1,6 +1,6 @@
 import { Client, Collection, type ClientOptions } from 'discord.js';
 
-import { type Command } from './command';
+import { type Command } from './command/command';
 
 export class DiscordClient<Ready extends boolean = boolean> extends Client<Ready> {
 	private _commands: Collection<string, Command>;

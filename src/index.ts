@@ -1,41 +1,13 @@
-import glob from 'glob';
-import * as dotenv from 'dotenv'
-import { promisify } from 'util';
-import { Collection, GatewayIntentBits } from 'discord.js';
+import * as dotenv from 'dotenv';
+import { GatewayIntentBits, Events } from 'discord.js';
 import { Player, type Queue } from 'discord-player';
 
+import { EventUtils } from '@utils/event';
 import { DiscordClient } from '@utils/discord-client';
-import { type Command } from '@utils/command';
 
-dotenv.config()
+dotenv.config();
 
-const client = new DiscordClient({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
-});
-
-client.login(process.env.DISCORD_BOT_TOKEN)
-
-client.once('ready', async () => {
-	const commands = new Collection<string, Command>();
-	const importedCommands = await loadCommands();
-	importedCommands.forEach(command => commands.set(command.name, command));
-	client.commands = commands;
-
-	console.log("Ready to serve you!!!")
-});
-
-const player = buildPlayer(client);
-
-async function loadCommands(): Promise<Command[]> {
-	const globPromise = promisify(glob);
-	const directoryFiles = `${__dirname}/commands/*{.js,.ts}`.replace(/\\/g, '/');
-	const commandFiles = await globPromise(directoryFiles).catch(err => {
-		console.error({ err });
-		return [];
-	});
-	const commandPromises: Promise<Command>[] = commandFiles.map(async file => await import(file));
-	return await Promise.all(commandPromises);
-}
+const token = process.env.DISCORD_BOT_TOKEN as string;
 
 function buildPlayer(client: DiscordClient) {
 	const player = new Player(client);
@@ -72,3 +44,40 @@ function buildPlayer(client: DiscordClient) {
 
 	return player;
 }
+
+async function main() {
+	const client = new DiscordClient({
+		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+	});
+
+	const events = await EventUtils.load();
+
+	events.forEach(event => {
+		if (event.once) {
+			client.once(event.name, (...args) => event.execute(...args));
+		} else {
+			client.on(event.name, (...args) => event.execute(...args));
+		}
+	});
+
+	client.on(Events.InteractionCreate, async interaction => {
+		if (!interaction.isChatInputCommand()) return;
+		const command = client.commands.get(interaction.commandName);
+		if (!command) {
+			console.error('No command was found');
+			return;
+		}
+
+		try {
+			await command.execute(interaction);
+		} catch (err) {
+			console.error(`Could not execute command ${interaction.commandName}`);
+		}
+	});
+
+	client.login(token);
+
+	const player = buildPlayer(client);
+}
+
+main();
