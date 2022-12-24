@@ -6,7 +6,8 @@ export abstract class Command extends SlashCommandBuilder {
 	}
 
 	abstract execute<Cached extends CacheType = CacheType>(
-		interaction: ChatInputCommandInteraction<Cached>
+		interaction: ChatInputCommandInteraction<Cached>,
+		...args: any[]
 	): any;
 
 	abstract build(): this;

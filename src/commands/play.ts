@@ -5,7 +5,11 @@ class Play extends Command {
 		super();
 	}
 
-	execute<Cached extends CacheType = CacheType>(interaction: ChatInputCommandInteraction<Cached>) {}
+	execute<Cached extends CacheType = CacheType>(interaction: ChatInputCommandInteraction<Cached>) {
+		if (!interaction.isRepliable()) return;
+
+		interaction.reply('Todo: create play command');
+	}
 
 	build() {
 		return this.setName('play').setDescription('Attempt to play a song');

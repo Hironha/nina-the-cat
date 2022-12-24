@@ -4,6 +4,7 @@ import { Collection, REST, Routes } from 'discord.js';
 
 import { type Command } from './command';
 
+export type Commands = Collection<string, Command>;
 export class CommandUtils {
 	static async load() {
 		const globPromise = promisify(glob);
