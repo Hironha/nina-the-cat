@@ -21,9 +21,9 @@ export class EventUtils {
 	static attach(client: DiscordClient, events: Event[]): DiscordClient {
 		events.forEach(event => {
 			if (event.once) {
-				client.once(event.name, (...args) => event.execute(...args, client.commands));
+				client.once(event.name, (...args) => event.execute(...args, client));
 			} else {
-				client.on(event.name, (...args) => event.execute(...args, client.commands));
+				client.on(event.name, (...args) => event.execute(...args, client));
 			}
 		});
 
