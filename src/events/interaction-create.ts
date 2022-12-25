@@ -9,9 +9,14 @@ class InteractionCreate implements Event {
 
 	async execute(interaction: Interaction, commands: Commands): Promise<void> {
 		if (!interaction.isChatInputCommand()) return;
-    
+
 		const command = commands.get(interaction.commandName);
-		if (command) command.execute(interaction);
+
+		if (command) {
+			command.execute(interaction, commands);
+		} else {
+			console.log(`Command ${interaction.commandName} not found`);
+		}
 	}
 }
 

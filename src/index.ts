@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { GatewayIntentBits, Events } from 'discord.js';
+import { GatewayIntentBits } from 'discord.js';
 import { Player, type Queue } from 'discord-player';
 
 import { EventUtils } from '@utils/event';
@@ -54,24 +54,9 @@ async function main() {
 
 	events.forEach(event => {
 		if (event.once) {
-			client.once(event.name, (...args) => event.execute(...args));
+			client.once(event.name, (...args) => event.execute(...args, client.commands));
 		} else {
 			client.on(event.name, (...args) => event.execute(...args, client.commands));
-		}
-	});
-
-	client.on(Events.InteractionCreate, async interaction => {
-		if (!interaction.isChatInputCommand()) return;
-		const command = client.commands.get(interaction.commandName);
-		if (!command) {
-			console.error('No command was found');
-			return;
-		}
-
-		try {
-			await command.execute(interaction);
-		} catch (err) {
-			console.error(`Could not execute command ${interaction.commandName}`);
 		}
 	});
 
