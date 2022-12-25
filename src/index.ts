@@ -52,13 +52,7 @@ async function main() {
 
 	const events = await EventUtils.load();
 
-	events.forEach(event => {
-		if (event.once) {
-			client.once(event.name, (...args) => event.execute(...args, client.commands));
-		} else {
-			client.on(event.name, (...args) => event.execute(...args, client.commands));
-		}
-	});
+	EventUtils.attach(client, events);
 
 	client.login(token);
 

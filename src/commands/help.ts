@@ -1,15 +1,16 @@
 import { EmbedBuilder, bold, italic } from 'discord.js';
 import { Command, type Commands, type ChatInputCommandInteraction } from '@utils/command';
+import { type DiscordClient } from '@utils/discord-client';
 
 class Help extends Command {
 	constructor() {
 		super();
 	}
 
-	async execute(interaction: ChatInputCommandInteraction, commands: Commands) {
+	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
 		if (!interaction.isRepliable()) return;
 
-		const embedMessage = this.buildEmbedMessage(commands);
+		const embedMessage = this.buildEmbedMessage(client.commands);
 		interaction.reply({ embeds: [embedMessage] });
 	}
 
