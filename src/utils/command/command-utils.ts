@@ -2,13 +2,14 @@ import glob from 'glob';
 import { promisify } from 'util';
 import { Collection, REST, Routes } from 'discord.js';
 
+import { getSRCPath } from '@utils/path';
 import { type Command } from './command';
 
 export type Commands = Collection<string, Command>;
 export class CommandUtils {
 	static async load() {
 		const globPromise = promisify(glob);
-		const directoryFiles = `${process.cwd().replace(/\\/g, '/')}/src/commands/*{.js,.ts}`;
+		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
 		const commandFiles = await globPromise(directoryFiles);
 
 		const commandPromises: Promise<Command>[] = commandFiles.map(async file => {

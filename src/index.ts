@@ -7,9 +7,9 @@ import { DiscordClient } from '@utils/discord-client';
 
 dotenv.config();
 
-const token = process.env.DISCORD_BOT_TOKEN as string;
-
 async function main() {
+	const token = process.env.DISCORD_BOT_TOKEN as string;
+
 	const client = new DiscordClient({
 		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 	});

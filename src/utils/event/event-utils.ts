@@ -1,5 +1,6 @@
 import glob from 'glob';
 import { promisify } from 'util';
+import { getSRCPath } from '@utils/path';
 
 import { type DiscordClient } from '@utils/discord-client';
 import { type Event } from './event';
@@ -7,7 +8,8 @@ import { type Event } from './event';
 export class EventUtils {
 	static async load(): Promise<Event[]> {
 		const globPromise = promisify(glob);
-		const directoryFiles = `${process.cwd().replace(/\\/g, '/')}/src/events/*{.js,.ts}`;
+		const directoryFiles = `${getSRCPath()}/events/*{.js,.ts}`;
+
 		const eventFiles = await globPromise(directoryFiles);
 
 		const eventPromises: Promise<Event>[] = eventFiles.map(async file => {
