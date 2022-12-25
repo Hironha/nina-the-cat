@@ -1,4 +1,4 @@
-import { Guild, GuildMember, UserResolvable } from 'discord.js';
+import { GuildMember, UserResolvable } from 'discord.js';
 import { Player, QueryType } from 'discord-player';
 
 import { Command, type CacheType, type ChatInputCommandInteraction } from '@utils/command';
