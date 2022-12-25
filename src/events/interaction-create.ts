@@ -1,7 +1,6 @@
 import { Events, type Interaction, type ClientEvents } from 'discord.js';
 
 import { type Event } from '@utils/event';
-import { type Commands } from '@utils/command';
 import { type DiscordClient } from '@utils/discord-client';
 
 class InteractionCreate implements Event {

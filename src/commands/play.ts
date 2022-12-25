@@ -16,7 +16,7 @@ class Play extends Command {
 	}
 
 	build() {
-		return this.setName('play').setDescription('Attempt to play a song');
+		return this.setName('play').setDescription('Play a song in your voice channel!');
 	}
 }
 
