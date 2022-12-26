@@ -26,7 +26,7 @@ class Skip extends Command {
 	constructor() {
 		super();
 		this.setName('skip')
-			.setDescription('Skip current song!')
+			.setDescription('Skip a certain amount of songs (defaults to skip current song)')
 			.addIntegerOption(option =>
 				option.setName('amount').setDescription('Amount of songs to skip').setRequired(false)
 			);
@@ -84,13 +84,18 @@ class Skip extends Command {
 	private skipTracks(queue: Queue, amount: number): Either<InteractionReplyOptions, Track[]> {
 		if (!queue.playing) return left({ content: '😿 | No music is being played!' });
 
+		if (queue.tracks.length === 0) {
+			const currentTrack = queue.current;
+			queue.skip();
+			return right([currentTrack]);
+		}
+
 		const trackIndex = amount - 1;
 		const lastTrackIndex = queue.tracks.length - 1;
 		const skipTo = trackIndex >= lastTrackIndex ? lastTrackIndex : trackIndex;
+
 		const skippedTracks = [queue.current].concat(queue.tracks.slice(0, skipTo));
-
 		queue.skipTo(skipTo);
-
 		return right(skippedTracks);
 	}
 
@@ -109,7 +114,8 @@ class Skip extends Command {
 
 	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
 		const amount = interaction.options.getInteger('amount');
-		return amount ?? 0;
+		if (amount === null || amount < 1 || !Number.isInteger(amount)) return 1;
+		return amount;
 	}
 
 	private getInteractionProperties(
