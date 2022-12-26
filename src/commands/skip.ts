@@ -55,7 +55,7 @@ class Skip extends Command {
 			return void interaction.reply(queue.value);
 		}
 
-		const skippedTracks = this.skipTrack(queue.value, skipAmount);
+		const skippedTracks = this.skipTracks(queue.value, skipAmount);
 		if (skippedTracks.isLeft()) {
 			return void interaction.reply(skippedTracks.value);
 		}
@@ -81,7 +81,7 @@ class Skip extends Command {
 		return embedMessages;
 	}
 
-	private skipTrack(queue: Queue, amount: number): Either<InteractionReplyOptions, Track[]> {
+	private skipTracks(queue: Queue, amount: number): Either<InteractionReplyOptions, Track[]> {
 		if (!queue.playing) return left({ content: '😿 | No music is being played!' });
 
 		const trackIndex = amount - 1;
