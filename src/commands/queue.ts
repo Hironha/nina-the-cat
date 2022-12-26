@@ -21,7 +21,7 @@ type InteractionProperties = {
 class Queue extends Command {
 	constructor() {
 		super();
-		this.setName('queue').setDescription('View the queue of current songs!');
+		this.setName('queue').setDescription('View the queue of current songs');
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
