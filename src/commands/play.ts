@@ -5,6 +5,7 @@ import {
 	type User,
 	type VoiceBasedChannel,
 	type InteractionReplyOptions,
+	type TextBasedChannel,
 } from 'discord.js';
 
 import { left, right, type Either } from '@utils/flow';
@@ -15,7 +16,8 @@ type InteractionProperties = {
 	user: User;
 	guild: Guild;
 	query: string;
-	channel: VoiceBasedChannel;
+	textChannel: TextBasedChannel;
+	voiceChannel: VoiceBasedChannel;
 };
 
 class Play extends Command {
@@ -37,7 +39,7 @@ class Play extends Command {
 			}
 
 			const { player } = client;
-			const { guild, user, query, channel } = interactionProperties.value;
+			const { guild, user, query, voiceChannel, textChannel } = interactionProperties.value;
 
 			await interaction.deferReply();
 
@@ -47,14 +49,14 @@ class Play extends Command {
 				return;
 			}
 
-			const queue = await this.queueSong(player, guild, channel);
+			const queue = this.queueSong(player, guild, textChannel);
 			if (queue.isLeft()) {
 				interaction.followUp(queue.value);
 				return;
 			}
 
 			if (!queue.value.connection) {
-				await queue.value.connect(channel).catch(() => {
+				await queue.value.connect(voiceChannel).catch(() => {
 					player?.deleteQueue(guild.id);
 					interaction.followUp({ content: 'Could not join your voice channel!' });
 				});
@@ -64,11 +66,7 @@ class Play extends Command {
 				content: `⏱ | Loading your ${searchResult.value.playlist ? 'playlist' : 'track'}...`,
 			});
 
-			if (searchResult.value.playlist) {
-				queue.value.addTracks(searchResult.value.tracks);
-			} else {
-				queue.value.addTrack(searchResult.value.tracks[0]);
-			}
+			queue.value.addTracks(searchResult.value.tracks);
 
 			if (!queue.value.playing) {
 				await queue.value.play().catch(err => console.error(err));
@@ -124,10 +122,19 @@ class Play extends Command {
 		const member = this.getInteractionMember(interaction);
 		if (member.isLeft()) return member;
 
-		const channel = member.value.voice.channel;
+		const { channel } = member.value.voice;
 		if (channel) return right(channel);
 
 		const errMsg = 'You are not in a voice channel!';
+		return left({ content: errMsg, ephemeral: true });
+	}
+
+	private getInteractionTextChannel(
+		interaction: ChatInputCommandInteraction
+	): Either<InteractionReplyOptions, TextBasedChannel> {
+		if (interaction.channel) return right(interaction.channel);
+
+		const errMsg = 'Text channel not defined!';
 		return left({ content: errMsg, ephemeral: true });
 	}
 
@@ -140,14 +147,18 @@ class Play extends Command {
 		const query = this.getInteractionQuery(interaction);
 		if (query.isLeft()) return query;
 
-		const channel = this.getInteractionVoiceChannel(interaction);
-		if (channel.isLeft()) return channel;
+		const voiceChannel = this.getInteractionVoiceChannel(interaction);
+		if (voiceChannel.isLeft()) return voiceChannel;
+
+		const textChannel = this.getInteractionTextChannel(interaction);
+		if (textChannel.isLeft()) return textChannel;
 
 		return right({
 			user: interaction.user,
 			guild: guild.value,
 			query: query.value,
-			channel: channel.value,
+			voiceChannel: voiceChannel.value,
+			textChannel: textChannel.value,
 		});
 	}
 
@@ -168,20 +179,20 @@ class Play extends Command {
 		return right(result);
 	}
 
-	private async queueSong(
+	private queueSong(
 		player: Player,
 		guild: Guild,
-		channel: VoiceBasedChannel
-	): Promise<Either<InteractionReplyOptions, Queue<VoiceBasedChannel>>> {
+		textChannel: TextBasedChannel
+	): Either<InteractionReplyOptions, Queue<TextBasedChannel>> {
 		try {
-			const queue = await player.createQueue(guild, {
+			const queue = player.createQueue(guild, {
 				ytdlOptions: {
 					quality: 'highest',
 					filter: 'audioonly',
 					highWaterMark: 1 << 30,
 					dlChunkSize: 0,
 				},
-				metadata: channel,
+				metadata: textChannel,
 			});
 
 			return right(queue);
