@@ -1,25 +1,35 @@
 import {
+	bold,
+	Colors,
+	EmbedBuilder,
 	type Guild,
 	type GuildMember,
 	type InteractionReplyOptions,
 	type ChatInputCommandInteraction,
+	type APIEmbedField,
 } from 'discord.js';
-import { type Track, type Player } from 'discord-player';
+import { type Track, type Player, Queue } from 'discord-player';
 import { type DiscordClient } from '@utils/discord-client';
 
 import { Command } from '@utils/command';
+import { intoChunk } from '@utils/chunk';
 import { left, right, type Either } from '@utils/flow';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 
 type InteractionProperties = {
 	member: GuildMember;
 	guild: Guild;
+	amount: number;
 };
 
 class Skip extends Command {
 	constructor() {
 		super();
-		this.setName('skip').setDescription('Skip current song!');
+		this.setName('skip')
+			.setDescription('Skip current song!')
+			.addIntegerOption(option =>
+				option.setName('amount').setDescription('Amount of songs to skip').setRequired(false)
+			);
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
@@ -31,44 +41,75 @@ class Skip extends Command {
 		}
 
 		const { player } = client;
-		const { guild, member } = interactionProperties.value;
+		const { guild, member, amount: skipAmount } = interactionProperties.value;
 
-		const canMemberCall = this.validateCall(member, guild);
-		if (canMemberCall.isLeft()) {
-			return void interaction.reply(canMemberCall.value);
+		const isGuildMember = this.isGuildMember(member, guild);
+		if (isGuildMember.isLeft()) {
+			return void interaction.reply(isGuildMember.value);
 		}
 
 		await interaction.deferReply();
 
-		const skippedTrack = this.skipTrack(player, guild.id);
-		if (skippedTrack.isLeft()) {
-			return void interaction.reply(skippedTrack.value);
+		const queue = this.getQueue(player, guild.id);
+		if (queue.isLeft()) {
+			return void interaction.reply(queue.value);
 		}
 
-		interaction.followUp({
-			content: `✅ | Skipped **${skippedTrack.value}**!`,
+		const skippedTracks = this.skipTrack(queue.value, skipAmount);
+		if (skippedTracks.isLeft()) {
+			return void interaction.reply(skippedTracks.value);
+		}
+
+		const message = this.buildSkippedTracksMessage(skippedTracks.value);
+
+		interaction.followUp({ embeds: message }).catch(err => console.error(err));
+	}
+
+	private buildSkippedTracksMessage(skippedTracks: Track[]) {
+		const trackFields: APIEmbedField[] = skippedTracks.map((track, index) => ({
+			name: `${index + 1}.`,
+			value: bold(track.title),
+			inline: false,
+		}));
+
+		const embedMessages = intoChunk(trackFields, 20).map((chunk, index) => {
+			let embed = new EmbedBuilder().setColor(Colors.Blue).setFields(chunk);
+			if (index !== 0) return embed;
+			return embed.setTitle('🐱 | Skipped Songs');
 		});
+
+		return embedMessages;
 	}
 
-	private skipTrack(player: Player, queueId: string): Either<InteractionReplyOptions, Track> {
+	private skipTrack(queue: Queue, amount: number): Either<InteractionReplyOptions, Track[]> {
+		if (!queue.playing) return left({ content: '😿 | No music is being played!' });
+
+		const trackIndex = amount - 1;
+		const lastTrackIndex = queue.tracks.length - 1;
+		const skipTo = trackIndex >= lastTrackIndex ? lastTrackIndex : trackIndex;
+		const skippedTracks = [queue.current].concat(queue.tracks.slice(0, skipTo));
+
+		queue.skipTo(skipTo);
+
+		return right(skippedTracks);
+	}
+
+	private getQueue(player: Player, queueId: string): Either<InteractionReplyOptions, Queue> {
 		const queue = player.getQueue(queueId);
-		if (!queue || !queue.playing) {
-			return left({ content: '❌ | No music is being played!' });
-		}
+		if (!queue) return left({ content: '😿 | No music is being played!' });
 
-		const currentTrack = queue.current;
-		const success = queue.skip();
-		if (!success) {
-			return left({ content: '❌ | Something went wrong!' });
-		}
-
-		return right(currentTrack);
+		return right(queue);
 	}
 
-	private validateCall(member: GuildMember, guild: Guild): Either<InteractionReplyOptions, null> {
+	private isGuildMember(member: GuildMember, guild: Guild): Either<InteractionReplyOptions, null> {
 		if (member.guild.id === guild.id) return right(null);
 
 		return left({ content: "You're not a guild member!", ephemeral: true });
+	}
+
+	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
+		const amount = interaction.options.getInteger('amount');
+		return amount ?? 0;
 	}
 
 	private getInteractionProperties(
@@ -80,7 +121,9 @@ class Skip extends Command {
 		const guild = PlayerInteractionUtils.getGuild(interaction);
 		if (guild.isLeft()) return guild;
 
-		return right({ member: member.value, guild: guild.value });
+		const amount = this.getSkipAmount(interaction);
+
+		return right({ member: member.value, guild: guild.value, amount });
 	}
 }
 
