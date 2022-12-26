@@ -1,6 +1,5 @@
 import { PlayerSearchResult, QueryType, type Queue, type Player } from 'discord-player';
 import {
-	GuildMember,
 	type Guild,
 	type User,
 	type VoiceBasedChannel,
@@ -9,6 +8,7 @@ import {
 } from 'discord.js';
 
 import { left, right, type Either } from '@utils/flow';
+import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { Command, type CacheType, type ChatInputCommandInteraction } from '@utils/command';
 import { type DiscordClient } from '@utils/discord-client';
 
@@ -28,14 +28,13 @@ class Play extends Command {
 	async execute<Cached extends CacheType = CacheType>(
 		interaction: ChatInputCommandInteraction<Cached>,
 		client: DiscordClient
-	) {
+	): Promise<void> {
 		try {
 			if (!interaction.isRepliable() || !client.player) return;
 
 			const interactionProperties = this.getInteractionProperties(interaction);
 			if (interactionProperties.isLeft()) {
-				interaction.reply(interactionProperties.value);
-				return;
+				return void interaction.reply(interactionProperties.value);
 			}
 
 			const { player } = client;
@@ -45,14 +44,12 @@ class Play extends Command {
 
 			const searchResult = await this.searchSong(player, query, user);
 			if (searchResult.isLeft()) {
-				interaction.followUp(searchResult.value);
-				return;
+				return void interaction.followUp(searchResult.value);
 			}
 
 			const queue = this.queueSong(player, guild, textChannel);
 			if (queue.isLeft()) {
-				interaction.followUp(queue.value);
-				return;
+				return void interaction.followUp(queue.value);
 			}
 
 			if (!queue.value.connection) {
@@ -74,7 +71,7 @@ class Play extends Command {
 		} catch (err) {
 			console.error(err);
 			interaction.followUp({
-				content: 'There was an err trying to execute that command: ' + (err as Error).message,
+				content: 'There was an error trying to execute that command: ' + (err as Error).message,
 			});
 		}
 	}
@@ -88,69 +85,28 @@ class Play extends Command {
 		return this;
 	}
 
-	private getInteractionMember(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, GuildMember> {
-		if (interaction.member instanceof GuildMember) return right(interaction.member);
-
-		const errMsg = 'User is not a guild member!';
-		return left({ content: errMsg, ephemeral: true });
-	}
-
-	private getInteractionGuild(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, Guild> {
-		if (interaction.guild) return right(interaction.guild);
-
-		const errMsg = 'You should be in a guild to use my services!';
-		return left({ content: errMsg, ephemeral: true });
-	}
-
 	private getInteractionQuery(
 		interaction: ChatInputCommandInteraction
 	): Either<InteractionReplyOptions, string> {
 		const query = interaction.options.getString('query');
 		if (query) return right(query);
 
-		const errMsg = 'You need to inform me the song!';
-		return left({ content: errMsg, ephemeral: true });
-	}
-
-	private getInteractionVoiceChannel(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, VoiceBasedChannel> {
-		const member = this.getInteractionMember(interaction);
-		if (member.isLeft()) return member;
-
-		const { channel } = member.value.voice;
-		if (channel) return right(channel);
-
-		const errMsg = 'You are not in a voice channel!';
-		return left({ content: errMsg, ephemeral: true });
-	}
-
-	private getInteractionTextChannel(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, TextBasedChannel> {
-		if (interaction.channel) return right(interaction.channel);
-
-		const errMsg = 'Text channel not defined!';
-		return left({ content: errMsg, ephemeral: true });
+		return left({ content: 'You need to inform me the song!', ephemeral: true });
 	}
 
 	private getInteractionProperties(
 		interaction: ChatInputCommandInteraction
 	): Either<InteractionReplyOptions, InteractionProperties> {
-		const guild = this.getInteractionGuild(interaction);
+		const guild = PlayerInteractionUtils.getGuild(interaction);
 		if (guild.isLeft()) return guild;
 
 		const query = this.getInteractionQuery(interaction);
 		if (query.isLeft()) return query;
 
-		const voiceChannel = this.getInteractionVoiceChannel(interaction);
+		const voiceChannel = PlayerInteractionUtils.getVoiceChannel(interaction);
 		if (voiceChannel.isLeft()) return voiceChannel;
 
-		const textChannel = this.getInteractionTextChannel(interaction);
+		const textChannel = PlayerInteractionUtils.getTextChannel(interaction);
 		if (textChannel.isLeft()) return textChannel;
 
 		return right({
@@ -172,8 +128,7 @@ class Play extends Command {
 			.catch(() => {});
 
 		if (!result || !result.tracks.length) {
-			const errMsg = 'No results were found!';
-			return left({ content: errMsg });
+			return left({ content: 'No results were found!' });
 		}
 
 		return right(result);
