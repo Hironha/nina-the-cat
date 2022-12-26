@@ -1,4 +1,4 @@
-import { PlayerSearchResult, QueryType, type Queue, type Player } from 'discord-player';
+import { PlayerSearchResult, QueryType, type Queue, type Player, Track } from 'discord-player';
 import {
 	type Guild,
 	type User,
@@ -23,6 +23,11 @@ type InteractionProperties = {
 class Play extends Command {
 	constructor() {
 		super();
+		this.setName('play')
+			.setDescription('Play a song in your voice channel')
+			.addStringOption(option =>
+				option.setName('query').setDescription('The song you want to play').setRequired(true)
+			);
 	}
 
 	async execute<Cached extends CacheType = CacheType>(
@@ -63,7 +68,11 @@ class Play extends Command {
 				content: `⏱ | Loading your ${searchResult.value.playlist ? 'playlist' : 'track'}...`,
 			});
 
-			queue.value.addTracks(searchResult.value.tracks);
+			if (searchResult.value.playlist) {
+				queue.value.addTracks(searchResult.value.tracks);
+			} else {
+				queue.value.addTrack(searchResult.value.tracks[0]);
+			}
 
 			if (!queue.value.playing) {
 				await queue.value.play().catch(err => console.error(err));
@@ -74,15 +83,6 @@ class Play extends Command {
 				content: 'There was an error trying to execute that command: ' + (err as Error).message,
 			});
 		}
-	}
-
-	build() {
-		this.setName('play')
-			.setDescription('Play a song in your voice channel')
-			.addStringOption(option =>
-				option.setName('query').setDescription('The song you want to play').setRequired(true)
-			);
-		return this;
 	}
 
 	private getInteractionQuery(
@@ -158,4 +158,4 @@ class Play extends Command {
 	}
 }
 
-export default new Play().build();
+export default new Play();

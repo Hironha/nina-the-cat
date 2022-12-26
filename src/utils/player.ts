@@ -1,6 +1,8 @@
-import { Player, type Queue } from 'discord-player';
+import { Colors, bold, EmbedBuilder } from 'discord.js';
+import { Player } from 'discord-player';
 import { DiscordClient } from './discord-client';
 
+import { intoChunk } from './chunk';
 import { type TextBasedChannel } from 'discord.js';
 
 export class PlayerUtils {
@@ -24,15 +26,34 @@ export class PlayerUtils {
 			const channel = queue.metadata as TextBasedChannel;
 
 			channel.send(
-				`▶ | Started playing: **${track.title}** in **${queue.connection.channel.name}**!`
+				`▶ | Started playing: ${bold(track.title)} in ${bold(queue.connection.channel.name)}!`
 			);
+		});
+
+		player.on('tracksAdd', (queue, tracks) => {
+			if (!queue.metadata) return;
+			const channel = queue.metadata as TextBasedChannel;
+
+			const trackFields = tracks.map((track, index) => ({
+				name: `${index + 1}.`,
+				value: bold(track.title),
+				inline: false,
+			}));
+
+			const embedMessages = intoChunk(trackFields, 20).map((chunk, index) => {
+				let embed = new EmbedBuilder().setColor(Colors.Blue).setFields(chunk);
+				if (index !== 0) return embed;
+				return embed.setTitle('Queue').setDescription('All songs added to queue');
+			});
+
+			channel.send({ embeds: embedMessages });
 		});
 
 		player.on('trackAdd', (queue, track) => {
 			if (!queue.metadata) return;
 			const channel = queue.metadata as TextBasedChannel;
 
-			channel.send(`🎶 | Track **${track.title}** queued!`);
+			channel.send(`🎶 | Track ${bold(track.title)} queued!`);
 		});
 
 		player.on('botDisconnect', queue => {
