@@ -15,7 +15,7 @@ class Help extends Command {
 	}
 
 	build() {
-		return this.setName('help').setDescription('Reply with all available commands');
+		return this.setName('help').setDescription("List all available commands");
 	}
 
 	private buildEmbedMessage(commands: Commands) {
