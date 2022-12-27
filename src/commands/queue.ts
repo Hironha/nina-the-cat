@@ -27,6 +27,10 @@ class Queue extends Command {
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
 		if (!interaction.isRepliable() || !client.player) return;
 
+		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
+			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
+		}
+
 		const interactionProperties = this.getInteractionProperties(interaction);
 		if (interactionProperties.isLeft()) {
 			return void interaction.reply(interactionProperties.value);

@@ -3,7 +3,6 @@ import {
 	Colors,
 	EmbedBuilder,
 	type Guild,
-	type GuildMember,
 	type InteractionReplyOptions,
 	type ChatInputCommandInteraction,
 	type APIEmbedField,
@@ -17,7 +16,6 @@ import { left, right, type Either } from '@utils/flow';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 
 type InteractionProperties = {
-	member: GuildMember;
 	guild: Guild;
 	amount: number;
 };
@@ -35,18 +33,17 @@ class Skip extends Command {
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (!interaction.isRepliable() || !client.player) return;
 
+		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
+			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
+		}
+
 		const interactionProperties = this.getInteractionProperties(interaction);
 		if (interactionProperties.isLeft()) {
 			return void interaction.reply(interactionProperties.value);
 		}
 
 		const { player } = client;
-		const { guild, member, amount: skipAmount } = interactionProperties.value;
-
-		const isGuildMember = this.isGuildMember(member, guild);
-		if (isGuildMember.isLeft()) {
-			return void interaction.reply(isGuildMember.value);
-		}
+		const { guild, amount: skipAmount } = interactionProperties.value;
 
 		await interaction.deferReply();
 
@@ -106,12 +103,6 @@ class Skip extends Command {
 		return right(queue);
 	}
 
-	private isGuildMember(member: GuildMember, guild: Guild): Either<InteractionReplyOptions, null> {
-		if (member.guild.id === guild.id) return right(null);
-
-		return left({ content: "You're not a guild member!", ephemeral: true });
-	}
-
 	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
 		const amount = interaction.options.getInteger('amount');
 		if (amount === null || amount < 1 || !Number.isInteger(amount)) return 1;
@@ -121,15 +112,12 @@ class Skip extends Command {
 	private getInteractionProperties(
 		interaction: ChatInputCommandInteraction
 	): Either<InteractionReplyOptions, InteractionProperties> {
-		const member = PlayerInteractionUtils.getMember(interaction);
-		if (member.isLeft()) return member;
-
 		const guild = PlayerInteractionUtils.getGuild(interaction);
 		if (guild.isLeft()) return guild;
 
 		const amount = this.getSkipAmount(interaction);
 
-		return right({ member: member.value, guild: guild.value, amount });
+		return right({ guild: guild.value, amount });
 	}
 }
 

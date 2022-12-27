@@ -50,4 +50,14 @@ export class PlayerInteractionUtils {
 
 		return left({ content: 'Text channel not defined!', ephemeral: true });
 	}
+
+	static isFromGuildMember(interaction: ChatInputCommandInteraction) {
+		const guild = this.getGuild(interaction);
+		if (guild.isLeft()) return false;
+
+		const member = this.getMember(interaction);
+		if (member.isLeft()) return false;
+
+		return member.value.guild.id === guild.value.id;
+	}
 }
