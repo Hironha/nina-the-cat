@@ -7,9 +7,9 @@ class TrackStart implements PlayerEvent {
 	public once = false;
 	public name: keyof PlayerEvents = 'trackStart';
 
-	async execute(queue: Queue<any>, track: Track): Promise<void> {
+	async execute(queue: Queue<TextBasedChannel>, track: Track): Promise<void> {
 		if (!queue.metadata) return;
-		const channel = queue.metadata as TextBasedChannel;
+		const channel = queue.metadata;
 
 		const message = new EmbedBuilder()
 			.setColor(Colors.Blue)
