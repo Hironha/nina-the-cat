@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv';
+import { Player } from 'discord-player';
 import { GatewayIntentBits } from 'discord.js';
 
 import { EventUtils } from '@utils/event';
-import { PlayerUtils } from '@utils/player';
+import { PlayerEventUtils } from '@utils/player-event';
 import { DiscordClient } from '@utils/discord-client';
 
 dotenv.config();
@@ -17,8 +18,9 @@ async function main() {
 	const events = await EventUtils.load();
 	EventUtils.attach(client, events);
 
-	const player = PlayerUtils.build(client);
-	PlayerUtils.attach(client, player);
+	const player = new Player(client);
+	const playerEvents = await PlayerEventUtils.load();
+	PlayerEventUtils.attach(player, playerEvents);
 
 	client.login(token);
 }
