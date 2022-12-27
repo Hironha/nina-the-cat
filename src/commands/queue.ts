@@ -1,9 +1,9 @@
 import { intoChunk } from '@utils/chunk';
-import { left, right, type Either } from '@utils/flow';
+import { right, type Either } from '@utils/flow';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 
-import { type Player, Queue as PlayerQueue } from 'discord-player';
+import { type Queue as PlayerQueue } from 'discord-player';
 import {
 	bold,
 	Colors,
@@ -24,7 +24,7 @@ class Queue extends Command {
 		this.setName('queue').setDescription('View the queue of current songs');
 	}
 
-	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
+	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (!interaction.isRepliable() || !client.player) return;
 
 		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
@@ -39,7 +39,7 @@ class Queue extends Command {
 		const { player } = client;
 		const { guild } = interactionProperties.value;
 
-		const queue = this.getQueue(player, guild.id);
+		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.id);
 		if (queue.isLeft()) {
 			return void interaction.reply(queue.value);
 		}
@@ -55,13 +55,6 @@ class Queue extends Command {
 		if (guild.isLeft()) return guild;
 
 		return right({ guild: guild.value });
-	}
-
-	private getQueue(player: Player, queueId: string) {
-		const queue = player.getQueue(queueId);
-		if (!queue) return left({ content: '😿 | There are no songs in queue!' });
-
-		return right(queue);
 	}
 
 	private buildQueueEmbedMessage(queue: PlayerQueue) {

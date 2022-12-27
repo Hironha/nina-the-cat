@@ -1,3 +1,4 @@
+import { type Queue, type Player } from 'discord-player';
 import {
 	GuildMember,
 	type Guild,
@@ -6,6 +7,7 @@ import {
 	type InteractionReplyOptions,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
+
 import { left, right, type Either } from './flow';
 
 export class PlayerInteractionUtils {
@@ -59,5 +61,12 @@ export class PlayerInteractionUtils {
 		if (member.isLeft()) return false;
 
 		return member.value.guild.id === guild.value.id;
+	}
+
+	static getPlayerQueue(player: Player, queueId: string): Either<InteractionReplyOptions, Queue> {
+		const queue = player.getQueue(queueId);
+		if (!queue) return left({ content: '😿 | There are no songs in queue!' });
+
+		return right(queue);
 	}
 }

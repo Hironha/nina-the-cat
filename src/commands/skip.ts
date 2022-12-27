@@ -47,9 +47,13 @@ class Skip extends Command {
 
 		await interaction.deferReply();
 
-		const queue = this.getQueue(player, guild.id);
+		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.id);
 		if (queue.isLeft()) {
 			return void interaction.reply(queue.value);
+		}
+
+		if (!queue.value.playing) {
+			return void interaction.reply({ content: '😿 | No music is being played!' });
 		}
 
 		const skippedTracks = this.skipTracks(queue.value, skipAmount);
@@ -79,8 +83,6 @@ class Skip extends Command {
 	}
 
 	private skipTracks(queue: Queue, amount: number): Either<InteractionReplyOptions, Track[]> {
-		if (!queue.playing) return left({ content: '😿 | No music is being played!' });
-
 		if (queue.tracks.length === 0) {
 			const currentTrack = queue.current;
 			queue.skip();
@@ -96,19 +98,6 @@ class Skip extends Command {
 		return right(skippedTracks);
 	}
 
-	private getQueue(player: Player, queueId: string): Either<InteractionReplyOptions, Queue> {
-		const queue = player.getQueue(queueId);
-		if (!queue) return left({ content: '😿 | No music is being played!' });
-
-		return right(queue);
-	}
-
-	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
-		const amount = interaction.options.getInteger('amount');
-		if (amount === null || amount < 1 || !Number.isInteger(amount)) return 1;
-		return amount;
-	}
-
 	private getInteractionProperties(
 		interaction: ChatInputCommandInteraction
 	): Either<InteractionReplyOptions, InteractionProperties> {
@@ -118,6 +107,12 @@ class Skip extends Command {
 		const amount = this.getSkipAmount(interaction);
 
 		return right({ guild: guild.value, amount });
+	}
+
+	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
+		const amount = interaction.options.getInteger('amount');
+		if (amount === null || amount < 1 || !Number.isInteger(amount)) return 1;
+		return amount;
 	}
 }
 
