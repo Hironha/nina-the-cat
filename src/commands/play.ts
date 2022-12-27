@@ -128,7 +128,7 @@ class Play extends Command {
 			.catch(() => {});
 
 		if (!result || !result.tracks.length) {
-			return left({ content: 'No results were found!' });
+			return left({ content: '😿 | No results were found!' });
 		}
 
 		return right(result);
