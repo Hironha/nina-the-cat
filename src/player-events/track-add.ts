@@ -4,7 +4,7 @@ import { PlayerEvents, type Queue, type Track } from 'discord-player';
 
 class TrackAdd implements PlayerEvent {
 	public name: keyof PlayerEvents = 'trackAdd';
-	public once = true;
+	public once = false;
 
 	async execute(queue: Queue<TextBasedChannel>, track: Track): Promise<void> {
 		if (!queue.metadata) return;
