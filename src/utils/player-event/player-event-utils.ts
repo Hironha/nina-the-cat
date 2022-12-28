@@ -23,11 +23,17 @@ export class PlayerEventUtils {
 	}
 
 	static attach(player: Player, events: PlayerEvent[]): Player {
+		const createEventExecuter = (event: PlayerEvent) => {
+			return (...args: any[]) => {
+				event.execute(...args).catch(err => console.error(err));
+			};
+		};
+
 		events.forEach(event => {
 			if (event.once) {
-				player.once(event.name, (...args: any[]) => event.execute(...args));
+				player.once(event.name, createEventExecuter(event));
 			} else {
-				player.on(event.name, (...args: any[]) => event.execute(...args));
+				player.on(event.name, createEventExecuter(event));
 			}
 		});
 
