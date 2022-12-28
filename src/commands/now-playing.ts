@@ -29,7 +29,7 @@ class NowPlaying extends Command {
 	private buildCurrentTrackMessage(track: Track) {
 		const duration: APIEmbedField = {
 			name: 'Duration',
-			value: `00:00 - ${track.duration}`,
+			value: `00:00 - ${track.duration.padStart(5, '0')}`,
 			inline: false,
 		};
 
