@@ -1,4 +1,4 @@
-import { PlayerSearchResult, QueryType, type Queue, type Player, Track } from 'discord-player';
+import { type PlayerSearchResult, QueryType, type Queue, type Player } from 'discord-player';
 import {
 	type Guild,
 	type User,
@@ -63,10 +63,6 @@ class Play extends Command {
 					interaction.followUp({ content: 'Could not join your voice channel!' });
 				});
 			}
-
-			await interaction.followUp({
-				content: `⏱ | Loading your ${searchResult.value.playlist ? 'playlist' : 'track'}...`,
-			});
 
 			if (searchResult.value.playlist) {
 				queue.value.addTracks(searchResult.value.tracks);
