@@ -2,7 +2,6 @@ import {
 	bold,
 	Colors,
 	EmbedBuilder,
-	type Guild,
 	type InteractionReplyOptions,
 	type ChatInputCommandInteraction,
 	type APIEmbedField,
@@ -14,11 +13,6 @@ import { Command } from '@utils/command';
 import { intoChunk } from '@utils/chunk';
 import { right, type Either } from '@utils/flow';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
-
-type InteractionProperties = {
-	guild: Guild;
-	amount: number;
-};
 
 class Skip extends Command {
 	constructor() {
@@ -37,29 +31,23 @@ class Skip extends Command {
 			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
 		}
 
-		const interactionProperties = this.getInteractionProperties(interaction);
-		if (interactionProperties.isLeft()) {
-			return void interaction.reply(interactionProperties.value);
-		}
-
 		const { player } = client;
-		const { guild, amount: skipAmount } = interactionProperties.value;
+		const guild = PlayerInteractionUtils.getGuild(interaction);
+		if (guild.isLeft()) return void interaction.reply(guild.value);
+
+		const skipAmount = this.getSkipAmount(interaction);
 
 		await interaction.deferReply();
 
-		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.id);
-		if (queue.isLeft()) {
-			return void interaction.reply(queue.value);
-		}
+		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.value.id);
+		if (queue.isLeft()) return void interaction.editReply(queue.value);
 
 		if (!queue.value.playing) {
-			return void interaction.reply({ content: '😿 | No music is being played!' });
+			return void interaction.editReply({ content: '😿 | No music is being played!' });
 		}
 
 		const skippedTracks = this.skipTracks(queue.value, skipAmount);
-		if (skippedTracks.isLeft()) {
-			return void interaction.reply(skippedTracks.value);
-		}
+		if (skippedTracks.isLeft()) return void interaction.editReply(skippedTracks.value);
 
 		const message = this.buildSkippedTracksMessage(skippedTracks.value);
 
@@ -96,17 +84,6 @@ class Skip extends Command {
 		const skippedTracks = [queue.current].concat(queue.tracks.slice(0, skipTo));
 		queue.skipTo(skipTo);
 		return right(skippedTracks);
-	}
-
-	private getInteractionProperties(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, InteractionProperties> {
-		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) return guild;
-
-		const amount = this.getSkipAmount(interaction);
-
-		return right({ guild: guild.value, amount });
 	}
 
 	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
