@@ -1,5 +1,7 @@
-import { type PlayerSearchResult, QueryType, type Queue, type Player } from 'discord-player';
+import { QueryType, type PlayerSearchResult, type Queue, type Player } from 'discord-player';
 import {
+	Colors,
+	EmbedBuilder,
 	type Guild,
 	type User,
 	type VoiceBasedChannel,
@@ -48,14 +50,12 @@ class Play extends Command {
 			await interaction.deferReply();
 
 			const searchResult = await this.searchSong(player, query, user);
-			if (searchResult.isLeft()) {
-				return void interaction.followUp(searchResult.value);
-			}
+			if (searchResult.isLeft()) return void interaction.followUp(searchResult.value);
 
 			const queue = this.queueSong(player, guild, textChannel);
-			if (queue.isLeft()) {
-				return void interaction.followUp(queue.value);
-			}
+			if (queue.isLeft()) return void interaction.followUp(queue.value);
+
+			await interaction.followUp({ embeds: [this.buildLoadingMessage()] });
 
 			if (!queue.value.connection) {
 				await queue.value.connect(voiceChannel).catch(() => {
@@ -79,6 +79,13 @@ class Play extends Command {
 				content: 'There was an error trying to execute that command: ' + (err as Error).message,
 			});
 		}
+	}
+
+	private buildLoadingMessage() {
+		return new EmbedBuilder()
+			.setColor(Colors.Blue)
+			.setTitle('🐱 | Loading')
+			.setDescription("Wait a moment, I'm loading the track");
 	}
 
 	private getInteractionQuery(
