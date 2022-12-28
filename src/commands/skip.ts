@@ -7,12 +7,12 @@ import {
 	type ChatInputCommandInteraction,
 	type APIEmbedField,
 } from 'discord.js';
-import { type Track, type Player, Queue } from 'discord-player';
+import { type Track, Queue } from 'discord-player';
 import { type DiscordClient } from '@utils/discord-client';
 
 import { Command } from '@utils/command';
 import { intoChunk } from '@utils/chunk';
-import { left, right, type Either } from '@utils/flow';
+import { right, type Either } from '@utils/flow';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 
 type InteractionProperties = {
