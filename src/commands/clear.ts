@@ -17,18 +17,14 @@ class Clear extends Command {
 		if (!interaction.isRepliable() || !client.player) return;
 
 		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) {
-			return void interaction.reply(guild.value);
-		}
+		if (guild.isLeft()) return void interaction.reply(guild.value);
 
 		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
 			return void interaction.reply({ content: "You're not allowed to use this command" });
 		}
 
 		const queue = PlayerInteractionUtils.getPlayerQueue(client.player, guild.value.id);
-		if (queue.isLeft()) {
-			return void interaction.reply(queue.value);
-		}
+		if (queue.isLeft()) return void interaction.reply(queue.value);
 
 		queue.value.clear();
 		queue.value.skip();
