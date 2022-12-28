@@ -1,22 +1,10 @@
+import { type Queue as PlayerQueue } from 'discord-player';
+import { bold, Colors, EmbedBuilder, type APIEmbedField } from 'discord.js';
+
 import { intoChunk } from '@utils/chunk';
-import { right, type Either } from '@utils/flow';
+import { type DiscordClient } from '@utils/discord-client';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
-
-import { type Queue as PlayerQueue } from 'discord-player';
-import {
-	bold,
-	Colors,
-	EmbedBuilder,
-	type Guild,
-	type APIEmbedField,
-	type InteractionReplyOptions,
-} from 'discord.js';
-import { type DiscordClient } from '@utils/discord-client';
-
-type InteractionProperties = {
-	guild: Guild;
-};
 
 class Queue extends Command {
 	constructor() {
@@ -31,30 +19,18 @@ class Queue extends Command {
 			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
 		}
 
-		const interactionProperties = this.getInteractionProperties(interaction);
-		if (interactionProperties.isLeft()) {
-			return void interaction.reply(interactionProperties.value);
-		}
+		const guild = PlayerInteractionUtils.getGuild(interaction);
+		if (guild.isLeft()) return void interaction.reply(guild.value);
 
 		const { player } = client;
-		const { guild } = interactionProperties.value;
 
-		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.id);
+		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.value.id);
 		if (queue.isLeft()) {
 			return void interaction.reply(queue.value);
 		}
 
 		const queueEmbedMessage = this.buildQueueEmbedMessage(queue.value);
 		interaction.reply({ embeds: queueEmbedMessage }).catch(err => console.error(err));
-	}
-
-	private getInteractionProperties(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, InteractionProperties> {
-		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) return guild;
-
-		return right({ guild: guild.value });
 	}
 
 	private buildQueueEmbedMessage(queue: PlayerQueue) {
