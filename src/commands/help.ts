@@ -24,7 +24,7 @@ class Help extends Command {
 
 		return new EmbedBuilder()
 			.setColor(Colors.Blue)
-			.setTitle('Available Commands')
+			.setTitle('😽 | Available Commands')
 			.setDescription('Here are the available commands, nya.')
 			.setFields(availableCommands);
 	}
