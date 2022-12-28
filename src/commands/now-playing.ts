@@ -1,4 +1,4 @@
-import { EmbedBuilder, Colors, bold } from 'discord.js';
+import { EmbedBuilder, Colors, bold, APIEmbedField } from 'discord.js';
 import { type Track } from 'discord-player';
 import { type DiscordClient } from '@utils/discord-client';
 
@@ -27,12 +27,25 @@ class NowPlaying extends Command {
 	}
 
 	private buildCurrentTrackMessage(track: Track) {
+		const duration: APIEmbedField = {
+			name: 'Duration',
+			value: `00:00 - ${track.duration}`,
+			inline: false,
+		};
+
+		const requestedBy: APIEmbedField = {
+			name: 'Requested By',
+			value: track.requestedBy.username,
+			inline: false,
+		};
+
 		return new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('🐱 | Now Playing')
 			.setDescription(
 				`I'm currently playing the song ${bold(track.title)} by ${bold(track.author)}`
-			);
+			)
+			.addFields([duration, requestedBy]);
 	}
 }
 
