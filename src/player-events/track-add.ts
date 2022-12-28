@@ -12,7 +12,7 @@ class TrackAdd implements PlayerEvent {
 
 		const embedMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
-			.setTitle('😸 | Add Track')
+			.setTitle('🐱 | Add Track')
 			.setDescription(`Track ${bold(track.title)} queued!`);
 
 		channel.send({ embeds: [embedMessage] });

@@ -17,7 +17,7 @@ class TracksAdd implements PlayerEvent {
 		const embedMessages = intoChunk(trackFields, 20).map((chunk, index) => {
 			let embed = new EmbedBuilder().setColor(Colors.Blue).setFields(chunk);
 			if (index !== 0) return embed;
-			return embed.setTitle('😸 | Added Songs').setDescription('All songs added to queue');
+			return embed.setTitle('🐱 | Added Songs').setDescription('All songs added to queue');
 		});
 
 		channel.send({ embeds: embedMessages });

@@ -13,7 +13,7 @@ class TrackStart implements PlayerEvent {
 
 		const message = new EmbedBuilder()
 			.setColor(Colors.Blue)
-			.setTitle('😸 | Playing Now')
+			.setTitle('🐱 | Playing Now')
 			.setDescription(
 				`▶ | Started playing ${bold(track.title)} in ${bold(queue.connection.channel.name)}!`
 			);
