@@ -22,6 +22,8 @@ async function main() {
 	const playerEvents = await PlayerEventUtils.load();
 	PlayerEventUtils.attach(player, playerEvents);
 
+	client.player = player;
+
 	client.login(token);
 }
 
