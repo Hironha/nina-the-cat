@@ -35,11 +35,19 @@ export class CommandUtils {
 
 		const rest = new REST({ version: '10' }).setToken(token);
 
-		const data: any = await rest
-			.put(Routes.applicationGuildCommands(clientId, guildId), {
-				body: commands.map(command => command.toJSON()),
-			})
-			.catch(err => console.error(err));
+		const body = commands.map(command => command.toJSON());
+
+		let data: any = null;
+
+		if (guildId) {
+			data = await rest
+				.put(Routes.applicationGuildCommands(clientId, guildId), { body })
+				.catch(err => console.error(err));
+		} else {
+			data = await rest
+				.put(Routes.applicationCommands(clientId), { body })
+				.catch(err => console.error(err));
+		}
 
 		console.log(`Successfully reloaded ${data?.length} application (/) commands.`);
 	}
