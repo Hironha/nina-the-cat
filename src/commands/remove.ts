@@ -48,7 +48,7 @@ class Remove extends Command {
 	private buildRemoveMessage(removedTrack: Track) {
 		return new EmbedBuilder()
 			.setColor(Colors.Blue)
-			.setTitle('😺 | Removed Track')
+			.setTitle('🐱 | Remove')
 			.setDescription(`You removed the track ${bold(removedTrack.title)} from the queue`);
 	}
 
