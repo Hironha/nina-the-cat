@@ -93,7 +93,7 @@ class Play extends Command {
 
 	private validateInteraction(
 		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, true> {
+	): Either<InteractionReplyOptions, null> {
 		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
 			return left({
 				content: "You're not allowed to use this command",
@@ -101,7 +101,7 @@ class Play extends Command {
 			});
 		}
 
-		return right<true>(true);
+		return right(null);
 	}
 
 	private getInteractionProperties(
