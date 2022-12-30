@@ -23,11 +23,15 @@ export class EventUtils {
 	}
 
 	static attach(client: DiscordClient, events: Event[]): DiscordClient {
+		const createEventExecuter = (event: Event, client: DiscordClient) => {
+			return (...args: any[]) => event.execute(...args, client).catch(err => console.error(err));
+		};
+
 		events.forEach(event => {
 			if (event.once) {
-				client.once(event.name, (...args) => event.execute(...args, client));
+				client.once(event.name, createEventExecuter(event, client));
 			} else {
-				client.on(event.name, (...args) => event.execute(...args, client));
+				client.on(event.name, createEventExecuter(event, client));
 			}
 		});
 
