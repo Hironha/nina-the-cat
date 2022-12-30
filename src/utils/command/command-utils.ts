@@ -3,21 +3,32 @@ import { promisify } from 'util';
 import { Collection, REST, Routes } from 'discord.js';
 
 import { getSRCPath } from '@utils/path';
-import { type Command } from './command';
+import { Command } from './command';
 
 export type Commands = Collection<string, Command>;
+
+function isCommand(data: unknown): data is Command {
+	if (typeof data === 'object' && data !== null) {
+		return 'execute' in data;
+	}
+	return false;
+}
 export class CommandUtils {
 	static async load() {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
 		const commandFiles = await globPromise(directoryFiles);
 
-		const commandPromises: Promise<Command>[] = commandFiles.map(async file => {
+		const commandPromises = commandFiles.map(async file => {
 			const importedFile = await import(file);
-			return importedFile.default;
+			const command: unknown = importedFile.default;
+			if (!isCommand(command)) return null;
+			return command.isDevOnly() ? command : null;
 		});
 
-		return await Promise.all(commandPromises);
+		const commands = await Promise.all(commandPromises);
+
+		return commands.filter((command): command is Command => Boolean(command));
 	}
 
 	static collect(commands: Command[]) {
