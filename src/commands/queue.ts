@@ -15,19 +15,13 @@ class Queue extends Command {
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (!interaction.isRepliable() || !client.player) return;
 
-		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
-			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
-		}
-
 		const guild = PlayerInteractionUtils.getGuild(interaction);
 		if (guild.isLeft()) return void interaction.reply(guild.value);
 
 		const { player } = client;
 
 		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.value.id);
-		if (queue.isLeft()) {
-			return void interaction.reply(queue.value);
-		}
+		if (queue.isLeft()) return void interaction.reply(queue.value);
 
 		const queueEmbedMessage = this.buildQueueEmbedMessage(queue.value);
 		interaction.reply({ embeds: queueEmbedMessage }).catch(err => console.error(err));
