@@ -26,7 +26,7 @@ class Stop extends Command {
 		if (queue.isLeft()) return void interaction.reply(queue.value);
 
 		if (!queue.value.playing) {
-			return void interaction.reply({ content: "I'm not playing songs right now!" });
+			return void interaction.reply({ content: "I'm not playing any songs right now!" });
 		}
 
 		queue.value.clear();
