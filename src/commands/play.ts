@@ -36,48 +36,42 @@ class Play extends Command {
 		interaction: ChatInputCommandInteraction<Cached>,
 		client: DiscordClient
 	): Promise<void> {
-		try {
-			if (!interaction.isRepliable() || !client.player) return;
+		if (!interaction.isRepliable() || !client.player) return;
 
-			const interactionProperties = this.getInteractionProperties(interaction);
-			if (interactionProperties.isLeft()) {
-				return void interaction.reply(interactionProperties.value);
-			}
+		const interactionValidation = this.validateInteraction(interaction);
+		if (interactionValidation.isLeft()) return void interaction.reply(interactionValidation.value);
 
-			const { player } = client;
-			const { guild, user, query, voiceChannel, textChannel } = interactionProperties.value;
+		const interactionProperties = this.getInteractionProperties(interaction);
+		if (interactionProperties.isLeft()) return void interaction.reply(interactionProperties.value);
 
-			await interaction.deferReply();
+		const { player } = client;
+		const { guild, user, query, voiceChannel, textChannel } = interactionProperties.value;
 
-			const searchResult = await this.searchSong(player, query, user);
-			if (searchResult.isLeft()) return void interaction.followUp(searchResult.value);
+		await interaction.deferReply();
 
-			const queue = this.queueSong(player, guild, textChannel);
-			if (queue.isLeft()) return void interaction.followUp(queue.value);
+		const searchResult = await this.searchSong(player, query, user);
+		if (searchResult.isLeft()) return void interaction.followUp(searchResult.value);
 
-			await interaction.followUp({ embeds: [this.buildLoadingMessage()] });
+		const queue = this.queueSong(player, guild, textChannel);
+		if (queue.isLeft()) return void interaction.followUp(queue.value);
 
-			if (!queue.value.connection) {
-				await queue.value.connect(voiceChannel).catch(() => {
-					player?.deleteQueue(guild.id);
-					interaction.followUp({ content: 'Could not join your voice channel!' });
-				});
-			}
+		await interaction.followUp({ embeds: [this.buildLoadingMessage()] });
 
-			if (searchResult.value.playlist) {
-				queue.value.addTracks(searchResult.value.tracks);
-			} else {
-				queue.value.addTrack(searchResult.value.tracks[0]);
-			}
-
-			if (!queue.value.playing) {
-				await queue.value.play().catch(err => console.error(err));
-			}
-		} catch (err) {
-			console.error(err);
-			interaction.followUp({
-				content: 'There was an error trying to execute that command: ' + (err as Error).message,
+		if (!queue.value.connection) {
+			await queue.value.connect(voiceChannel).catch(() => {
+				player?.deleteQueue(guild.id);
+				interaction.followUp({ content: 'Could not join your voice channel!' });
 			});
+		}
+
+		if (searchResult.value.playlist) {
+			queue.value.addTracks(searchResult.value.tracks);
+		} else {
+			queue.value.addTrack(searchResult.value.tracks[0]);
+		}
+
+		if (!queue.value.playing) {
+			await queue.value.play().catch(err => console.error(err));
 		}
 	}
 
@@ -95,6 +89,19 @@ class Play extends Command {
 		if (query) return right(query);
 
 		return left({ content: 'You need to inform me the song!', ephemeral: true });
+	}
+
+	private validateInteraction(
+		interaction: ChatInputCommandInteraction
+	): Either<InteractionReplyOptions, true> {
+		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
+			return left({
+				content: "You're not allowed to use this command",
+				ephemeral: true,
+			});
+		}
+
+		return right<true>(true);
 	}
 
 	private getInteractionProperties(
