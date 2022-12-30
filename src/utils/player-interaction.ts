@@ -53,7 +53,7 @@ export class PlayerInteractionUtils {
 		return left({ content: 'Text channel not defined!', ephemeral: true });
 	}
 
-	static isFromGuildMember(interaction: ChatInputCommandInteraction) {
+	static isFromGuildMember(interaction: ChatInputCommandInteraction): boolean {
 		const guild = this.getGuild(interaction);
 		if (guild.isLeft()) return false;
 
@@ -61,6 +61,17 @@ export class PlayerInteractionUtils {
 		if (member.isLeft()) return false;
 
 		return member.value.guild.id === guild.value.id;
+	}
+
+	static isFromListener(interaction: ChatInputCommandInteraction): boolean {
+		const voiceChannel = this.getVoiceChannel(interaction);
+		if (voiceChannel.isLeft()) return false;
+
+		const member = this.getMember(interaction);
+		if (member.isLeft()) return false;
+
+		if (!member.value.voice.channelId) return false;
+		return member.value.voice.channelId === voiceChannel.value.id;
 	}
 
 	static getPlayerQueue(player: Player, queueId: string): Either<InteractionReplyOptions, Queue> {
