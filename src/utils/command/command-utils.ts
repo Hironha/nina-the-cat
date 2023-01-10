@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import { Collection, REST, Routes } from 'discord.js';
 
 import { getSRCPath } from '@utils/path';
+import { Environment } from '@utils/environment';
 import { Command } from './command';
 
 export type Commands = Collection<string, Command>;
@@ -23,26 +24,28 @@ export class CommandUtils {
 			const importedFile = await import(file);
 			const command: unknown = importedFile.default;
 			if (!isCommand(command)) return null;
-			return command.isDevOnly() ? command : null;
+
+			if (command.isDevOnly()) return Environment.isDevelopment() ? command : null;
+			return command;
 		});
 
 		const commands = await Promise.all(commandPromises);
-
 		return commands.filter((command): command is Command => Boolean(command));
 	}
 
 	static collect(commands: Command[]) {
 		const collection = new Collection<string, Command>();
-
 		commands.forEach(command => collection.set(command.name, command));
-
 		return collection;
 	}
 
 	static async publish(commands: Command[]) {
-		const guildId = process.env.GUILD_ID as string;
-		const clientId = process.env.CLIENT_ID as string;
-		const token = process.env.DISCORD_BOT_TOKEN as string;
+		const guildId = Environment.getGuildId();
+		const clientId = Environment.getClientId();
+		const token = Environment.getDiscordBotToken();
+
+		if (!token) throw new Error('DISCORD_BOT_TOKEN not declared in environment');
+		if (!clientId) throw new Error('CLIENT_ID not declared in environment');
 
 		const rest = new REST({ version: '10' }).setToken(token);
 
