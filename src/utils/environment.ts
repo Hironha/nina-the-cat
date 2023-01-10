@@ -1,4 +1,4 @@
-export class Environment {
+export abstract class Environment {
 	static isDevelopment(): boolean {
 		return process.env.ENVIRONMENT === 'development';
 	}
