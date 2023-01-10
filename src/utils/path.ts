@@ -1,9 +1,10 @@
+import { Environment } from './environment';
+
 export function getSRCPath(): string {
 	let srcPath = '';
 	const dirPath = process.cwd();
-	const isDevelopment = process.env.ENVIRONMENT === 'development';
 
-	if (isDevelopment) {
+	if (Environment.isDevelopment()) {
 		srcPath = `${dirPath}/src`;
 	} else {
 		srcPath = `${dirPath}/dist/src`;
