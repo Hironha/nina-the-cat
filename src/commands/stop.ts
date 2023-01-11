@@ -8,9 +8,7 @@ import { Command, type ChatInputCommandInteraction } from '@utils/command';
 class Stop extends Command {
 	constructor() {
 		super();
-		this.setName('stop')
-			.setDescription("Stop playing the song and clears the song's queue")
-			.setDevOnly();
+		this.setName('stop').setDescription("Stop playing the song and clears the song's queue");
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
