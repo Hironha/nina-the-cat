@@ -8,7 +8,7 @@ import { type PlayerEvent } from './player-event';
 export class PlayerEventUtils {
 	private constructor() {}
 
-	static async load() {
+	static async loadEvents() {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/player-events/*{.js,.ts}`;
 

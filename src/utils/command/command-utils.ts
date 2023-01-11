@@ -15,7 +15,7 @@ function isCommand(data: unknown): data is Command {
 	return false;
 }
 export class CommandUtils {
-	static async load() {
+	static async loadCommands() {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
 		const commandFiles = await globPromise(directoryFiles);
