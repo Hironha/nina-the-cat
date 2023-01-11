@@ -1,4 +1,9 @@
-import { QueryType, type PlayerSearchResult, type Queue, type Player } from 'discord-player';
+import {
+	QueryType,
+	type PlayerSearchResult,
+	type Player,
+	type PlayerOptions,
+} from 'discord-player';
 import {
 	Colors,
 	EmbedBuilder,
@@ -38,41 +43,39 @@ class Play extends Command {
 	): Promise<void> {
 		if (!interaction.isRepliable() || !client.player) return;
 
-		const interactionValidation = this.validateInteraction(interaction);
-		if (interactionValidation.isLeft()) return void interaction.reply(interactionValidation.value);
-
 		const interactionProperties = this.getInteractionProperties(interaction);
 		if (interactionProperties.isLeft()) return void interaction.reply(interactionProperties.value);
 
 		const { player } = client;
 		const { guild, user, query, voiceChannel, textChannel } = interactionProperties.value;
 
+		const playerQueue = player.getQueue(guild);
+		if (playerQueue?.connection && playerQueue.connection.channel.id !== voiceChannel.id) {
+			return void interaction.reply({
+				content: "You're not in the same voice channel as me!",
+				ephemeral: true,
+			});
+		}
+
 		await interaction.deferReply();
+		await interaction.followUp({ embeds: [this.buildLoadingMessage()] });
 
 		const searchResult = await this.searchSong(player, query, user);
 		if (searchResult.isLeft()) return void interaction.followUp(searchResult.value);
 
-		const queue = this.queueSong(player, guild, textChannel);
-		if (queue.isLeft()) return void interaction.followUp(queue.value);
+		const queue = player.createQueue(guild, this.createPlayerOptions(textChannel));
 
-		await interaction.followUp({ embeds: [this.buildLoadingMessage()] });
-
-		if (!queue.value.connection) {
-			await queue.value.connect(voiceChannel).catch(() => {
+		if (!queue.connection) {
+			await queue.connect(voiceChannel).catch(() => {
 				player?.deleteQueue(guild.id);
 				interaction.followUp({ content: 'Could not join your voice channel!' });
 			});
 		}
 
-		if (searchResult.value.playlist) {
-			queue.value.addTracks(searchResult.value.tracks);
-		} else {
-			queue.value.addTrack(searchResult.value.tracks[0]);
-		}
+		if (searchResult.value.playlist) queue.addTracks(searchResult.value.tracks);
+		else queue.addTrack(searchResult.value.tracks[0]);
 
-		if (!queue.value.playing) {
-			await queue.value.play().catch(err => console.error(err));
-		}
+		if (!queue.playing) await queue.play().catch(err => console.error(err));
 	}
 
 	private buildLoadingMessage() {
@@ -88,20 +91,7 @@ class Play extends Command {
 		const query = interaction.options.getString('query');
 		if (query) return right(query);
 
-		return left({ content: 'You need to inform me the song!', ephemeral: true });
-	}
-
-	private validateInteraction(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, null> {
-		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
-			return left({
-				content: "You're not allowed to use this command",
-				ephemeral: true,
-			});
-		}
-
-		return right(null);
+		return left({ content: 'You need to specify the song you want me to play!', ephemeral: true });
 	}
 
 	private getInteractionProperties(
@@ -137,34 +127,22 @@ class Play extends Command {
 			.search(song, { requestedBy: user, searchEngine: QueryType.AUTO })
 			.catch(() => {});
 
-		if (!result || !result.tracks.length) {
-			return left({ content: '😿 | No results were found!' });
-		}
-
+		if (!result || !result.tracks.length) return left({ content: '😿 | No results were found!' });
 		return right(result);
 	}
 
-	private queueSong(
-		player: Player,
-		guild: Guild,
+	private createPlayerOptions(
 		textChannel: TextBasedChannel
-	): Either<InteractionReplyOptions, Queue<TextBasedChannel>> {
-		try {
-			const queue = player.createQueue(guild, {
-				ytdlOptions: {
-					quality: 'highest',
-					filter: 'audioonly',
-					highWaterMark: 1 << 30,
-					dlChunkSize: 0,
-				},
-				metadata: textChannel,
-			});
-
-			return right(queue);
-		} catch (err) {
-			console.error(err);
-			return left({ content: 'Something went wrong when I tried to create the queue!' });
-		}
+	): PlayerOptions & { metadata: TextBasedChannel } {
+		return {
+			ytdlOptions: {
+				quality: 'highest',
+				filter: 'audioonly',
+				highWaterMark: 1 << 30,
+				dlChunkSize: 0,
+			},
+			metadata: textChannel,
+		};
 	}
 }
 
