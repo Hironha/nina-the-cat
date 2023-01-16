@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/src/index.js",
-    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --ignore-watch node_modules --no-notify src/index.ts"
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --ignore-watch node_modules --no-notify src/index.ts",
+    "deploy": "pm2 start dist/src/index.js --name nina-the-cat"
   },
   "devDependencies": {
     "@types/filesystem": "^0.0.32",
