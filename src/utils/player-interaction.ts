@@ -76,7 +76,10 @@ export class PlayerInteractionUtils {
 
 	static getPlayerQueue(player: Player, queueId: string): Either<InteractionReplyOptions, Queue> {
 		const queue = player.getQueue(queueId);
-		if (!queue) return left({ content: '😿 | There are no songs in queue!' });
+		const isQueueEmpty = queue?.tracks.length === 0 && !queue?.playing;
+		if (!queue || isQueueEmpty) {
+			return left({ content: '😿 | There are no songs in queue!' });
+		}
 
 		return right(queue);
 	}
