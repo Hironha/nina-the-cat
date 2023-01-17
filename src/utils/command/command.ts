@@ -10,7 +10,7 @@ export abstract class Command extends SlashCommandBuilder {
 	abstract execute<Cached extends CacheType = CacheType>(
 		interaction: ChatInputCommandInteraction<Cached>,
 		...args: any[]
-	): void | Promise<void>;
+	): Promise<void>;
 
 	isDevOnly(): boolean {
 		return this._devOnly;
