@@ -5,6 +5,7 @@ import {
 	type PlayerOptions,
 } from 'discord-player';
 import {
+	bold,
 	Colors,
 	EmbedBuilder,
 	type Guild,
@@ -66,14 +67,24 @@ class Play extends Command {
 		const queue = player.createQueue(guild, this.createPlayerOptions(textChannel));
 
 		if (!queue.connection) {
-			await queue.connect(voiceChannel).catch(() => {
+			if (voiceChannel.joinable) {
+				await queue.connect(voiceChannel).catch(() => {
+					player?.deleteQueue(guild.id);
+					return interaction.followUp({ content: 'Could not join your voice channel!' });
+				});
+			} else {
 				player?.deleteQueue(guild.id);
-				interaction.followUp({ content: 'Could not join your voice channel!' });
-			});
+				return void interaction.followUp({
+					content: `I can't join the voice channel ${bold(voiceChannel.name)}`,
+				});
+			}
 		}
 
-		if (searchResult.value.playlist) queue.addTracks(searchResult.value.tracks);
-		else queue.addTrack(searchResult.value.tracks[0]);
+		if (searchResult.value.playlist) {
+			queue.addTracks(searchResult.value.tracks);
+		} else {
+			queue.addTrack(searchResult.value.tracks[0]);
+		}
 
 		if (!queue.playing) await queue.play().catch(err => console.error(err));
 	}
