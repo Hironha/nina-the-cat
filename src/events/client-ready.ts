@@ -1,5 +1,6 @@
 import { ClientEvents, Events } from 'discord.js';
 import { CommandUtils } from '@utils/command';
+import { Environment } from '@utils/environment';
 
 import { type Event } from '@utils/event';
 import { type DiscordClient } from '@utils/discord-client';
@@ -12,7 +13,7 @@ class ClientReady implements Event {
 		const commands = await CommandUtils.loadCommands();
 		client.commands = CommandUtils.collect(commands);
 
-		if (process.env.PUBLISH_COMMANDS === 'true') {
+		if (Environment.getPublishCommands()) {
 			await CommandUtils.publish(commands);
 		}
 
