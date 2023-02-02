@@ -46,11 +46,11 @@ class Right<T> implements Flow<T> {
 	}
 }
 
-function left<T>(value: T) {
+function left<T>(value: T): Left<T> {
 	return new Left(value);
 }
 
-function right<T>(value: T) {
+function right<T>(value: T): Right<T> {
 	return new Right(value);
 }
 
