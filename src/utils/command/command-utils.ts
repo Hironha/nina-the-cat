@@ -15,7 +15,7 @@ function isCommand(data: unknown): data is Command {
 	return false;
 }
 export class CommandUtils {
-	static async loadCommands() {
+	static async loadCommands(): Promise<Command[]> {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
 		const commandFiles = await globPromise(directoryFiles);
@@ -33,13 +33,13 @@ export class CommandUtils {
 		return commands.filter((command): command is Command => Boolean(command));
 	}
 
-	static collect(commands: Command[]) {
+	static collect(commands: Command[]): Collection<string, Command> {
 		const collection = new Collection<string, Command>();
 		commands.forEach(command => collection.set(command.name, command));
 		return collection;
 	}
 
-	static async publish(commands: Command[]) {
+	static async publish(commands: Command[]): Promise<void> {
 		const guildId = Environment.getGuildId();
 		const clientId = Environment.getClientId();
 		const token = Environment.getDiscordBotToken();

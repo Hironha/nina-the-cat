@@ -12,7 +12,7 @@ export class DiscordClient<Ready extends boolean = boolean> extends Client<Ready
 		this._commands = new Collection();
 	}
 
-	get commands() {
+	get commands(): Collection<string, Command> {
 		return this._commands;
 	}
 
