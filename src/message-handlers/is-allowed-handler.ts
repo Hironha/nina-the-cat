@@ -1,21 +1,19 @@
+import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
 import { DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type ReplyMethod } from '@utils/message-handler';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
-import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
 
 export type Options = {
-	method?: ReplyMethod;
-	guildMember?: boolean;
+	fromGuild?: boolean;
 };
 
-export class IsAllowed extends MessageHandler {
+export class IsAllowedHandler extends MessageHandler {
 	private options: Required<Options>;
 
-	constructor(options: Options) {
-		super();
+	constructor(options: Options & { method?: ReplyMethod }) {
+		super(options.method ?? 'reply');
 		this.options = {
-			method: options.method ?? 'reply',
-			guildMember: options.guildMember ?? true,
+			fromGuild: options.fromGuild ?? true,
 		};
 	}
 
@@ -24,7 +22,7 @@ export class IsAllowed extends MessageHandler {
 		client: DiscordClient<boolean>
 	): Promise<void> {
 		if (!this.validate(interaction)) {
-			await interaction.reply({
+			await this.reply(interaction, {
 				content: "You're not allowed to use this command",
 				ephemeral: true,
 			});
@@ -36,7 +34,7 @@ export class IsAllowed extends MessageHandler {
 	private validate(interaction: ChatInputCommandInteraction<CacheType>) {
 		let isAllowed = true;
 
-		if (this.options.guildMember) {
+		if (this.options.fromGuild) {
 			isAllowed = PlayerInteractionUtils.isFromGuildMember(interaction);
 		}
 

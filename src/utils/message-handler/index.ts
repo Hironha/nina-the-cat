@@ -1,5 +1,8 @@
 import { type DiscordClient } from '@utils/discord-client';
-import { type ChatInputCommandInteraction } from 'discord.js';
+import {
+	type InteractionReplyOptions,
+	type ChatInputCommandInteraction,
+} from 'discord.js';
 
 export type ReplyMethod = 'follow-up' | 'reply' | 'edit-reply';
 
@@ -11,19 +14,33 @@ export abstract class MessageHandler {
 		this.method = method ?? 'reply';
 	}
 
-	fallback(handler: MessageHandler) {
+	fallback(handler: MessageHandler): void {
 		this.nextHandler = handler;
 	}
 
-	next(nextHandler: MessageHandler) {
+	next(nextHandler: MessageHandler): MessageHandler {
 		this.nextHandler = nextHandler;
 		return nextHandler;
 	}
 
-	async handle(interaction: ChatInputCommandInteraction, client: DiscordClient) {
+	async handle(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (this.nextHandler) {
 			this.nextHandler.handle(interaction, client);
 			interaction.reply({});
+		}
+	}
+
+	protected async reply(
+		interaction: ChatInputCommandInteraction,
+		options: InteractionReplyOptions
+	): Promise<void> {
+		switch (this.method) {
+			case 'reply':
+				await interaction.reply(options);
+			case 'follow-up':
+				await interaction.followUp(options);
+			case 'edit-reply':
+				await interaction.editReply(options);
 		}
 	}
 }
