@@ -1,10 +1,10 @@
 import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
 import { type DiscordClient } from '@utils/discord-client';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
-import { MessageHandler, type ReplyMethod } from '@utils/message-handler';
+import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
 export class SameVoiceChannelHandler extends MessageHandler {
-	constructor(options: { method?: ReplyMethod }) {
+	constructor(options: MessageHandlerOptions<{}>) {
 		super(options.method ?? 'reply');
 	}
 

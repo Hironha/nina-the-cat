@@ -1,16 +1,16 @@
 import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
 import { DiscordClient } from '@utils/discord-client';
-import { MessageHandler, type ReplyMethod } from '@utils/message-handler';
+import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 
-export type Options = {
+type Options = {
 	fromGuild?: boolean;
 };
 
 export class IsAllowedHandler extends MessageHandler {
 	private options: Required<Options>;
 
-	constructor(options: Options & { method?: ReplyMethod }) {
+	constructor(options: MessageHandlerOptions<Options>) {
 		super(options.method ?? 'reply');
 		this.options = {
 			fromGuild: options.fromGuild ?? true,

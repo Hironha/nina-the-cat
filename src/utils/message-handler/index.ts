@@ -1,10 +1,11 @@
 import { type DiscordClient } from '@utils/discord-client';
-import {
-	type InteractionReplyOptions,
-	type ChatInputCommandInteraction,
-} from 'discord.js';
+import { type InteractionReplyOptions, type ChatInputCommandInteraction } from 'discord.js';
 
 export type ReplyMethod = 'follow-up' | 'reply' | 'edit-reply';
+
+export type MessageHandlerOptions<T extends {}> = T & {
+	method?: ReplyMethod;
+};
 
 export abstract class MessageHandler {
 	protected nextHandler: MessageHandler | null = null;
