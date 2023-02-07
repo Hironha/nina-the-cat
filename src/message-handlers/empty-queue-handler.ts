@@ -17,14 +17,14 @@ export class EmptyQueueHandler extends MessageHandler {
 			const queue = client.player.getQueue(interaction.guild.id);
 			const isQueueEmpty = queue?.tracks.length === 0 && !queue?.playing;
 			if (!queue || isQueueEmpty) {
-				await this.reply(interaction, { embeds: this.buildMessage() });
+				await this.reply(interaction, { embeds: this.buildEmbeds() });
 			}
 		}
 
 		await super.handle(interaction, client);
 	}
 
-	private buildMessage(): EmbedBuilder[] {
+	private buildEmbeds(): EmbedBuilder[] {
 		const clearMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('😿 | Empty')
