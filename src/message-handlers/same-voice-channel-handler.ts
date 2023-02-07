@@ -1,10 +1,12 @@
-import { type ChatInputCommandInteraction, type CacheType } from 'discord.js';
+import { type ChatInputCommandInteraction, type CacheType, EmbedBuilder, Colors } from 'discord.js';
 import { type DiscordClient } from '@utils/discord-client';
 import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
+type Options = {}
+
 export class SameVoiceChannelHandler extends MessageHandler {
-	constructor(options: MessageHandlerOptions<{}>) {
+	constructor(options: MessageHandlerOptions<Options>) {
 		super(options.method ?? 'reply');
 	}
 
@@ -16,9 +18,15 @@ export class SameVoiceChannelHandler extends MessageHandler {
 			await super.handle(interaction, client);
 		}
 
-		await this.reply(interaction, {
-			content: "You're not in the same voice channel as me",
-			ephemeral: true,
-		});
+		await this.reply(interaction, { embeds: this.buildEmbeds(), ephemeral: true });
+	}
+
+	private buildEmbeds(): EmbedBuilder[] {
+		const message = new EmbedBuilder()
+			.setColor(Colors.Blue)
+			.setTitle('🐱 | Warning')
+			.setDescription("You're not in the same voice channel as me!");
+
+		return [message];
 	}
 }
