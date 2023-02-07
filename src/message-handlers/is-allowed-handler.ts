@@ -31,7 +31,7 @@ export class IsAllowedHandler extends MessageHandler {
 		}
 	}
 
-	private isAllowed(interaction: ChatInputCommandInteraction<CacheType>) {
+	private isAllowed(interaction: ChatInputCommandInteraction<CacheType>): boolean {
 		let isAllowed = true;
 
 		if (this.options.fromGuild) {
