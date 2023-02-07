@@ -1,0 +1,44 @@
+import {
+	Colors,
+	GuildMember,
+	EmbedBuilder,
+	type CacheType,
+	type ChatInputCommandInteraction,
+} from 'discord.js';
+import { type DiscordClient } from '@utils/discord-client';
+import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
+
+type Options = {};
+
+export class InVoiceChannelHandler extends MessageHandler {
+	constructor(options: MessageHandlerOptions<Options>) {
+		super(options.method ?? 'reply');
+	}
+
+	async handle(
+		interaction: ChatInputCommandInteraction<CacheType>,
+		client: DiscordClient<boolean>
+	): Promise<void> {
+		if (interaction.isRepliable() && this.isMember(interaction.member)) {
+			if (!interaction.member.voice.channel) {
+				await this.reply(interaction, { embeds: this.buildEmbeds(), ephemeral: true });
+			}
+		}
+
+		await super.handle(interaction, client);
+	}
+
+	private buildEmbeds(): EmbedBuilder[] {
+		const message = new EmbedBuilder()
+			.setColor(Colors.Blue)
+			.setTitle('🐱 | Confused')
+			.setDescription("You're not in a voice channel?!");
+
+		return [message];
+	}
+
+	private isMember(member: ChatInputCommandInteraction['member']): member is GuildMember {
+		if (!member) return false;
+		return member instanceof GuildMember;
+	}
+}
