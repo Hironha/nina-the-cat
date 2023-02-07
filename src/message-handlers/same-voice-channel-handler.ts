@@ -13,7 +13,7 @@ export class SameVoiceChannelHandler extends MessageHandler {
 		client: DiscordClient<boolean>
 	): Promise<void> {
 		if (PlayerInteractionUtils.isFromListener(interaction)) {
-			return super.handle(interaction, client);
+			await super.handle(interaction, client);
 		}
 
 		await this.reply(interaction, {
