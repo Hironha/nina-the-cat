@@ -21,17 +21,17 @@ export class IsAllowedHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (!this.validate(interaction)) {
+		if (!this.isAllowed(interaction)) {
 			await this.reply(interaction, {
 				content: "You're not allowed to use this command",
 				ephemeral: true,
 			});
 		} else {
-			return super.handle(interaction, client);
+			await super.handle(interaction, client);
 		}
 	}
 
-	private validate(interaction: ChatInputCommandInteraction<CacheType>) {
+	private isAllowed(interaction: ChatInputCommandInteraction<CacheType>) {
 		let isAllowed = true;
 
 		if (this.options.fromGuild) {
