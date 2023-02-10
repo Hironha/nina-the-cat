@@ -150,7 +150,7 @@ class Play extends Command {
 				quality: 'highest',
 				filter: 'audioonly',
 				highWaterMark: 10_000_000,
-				dlChunkSize: 256,
+				dlChunkSize: 0,
 			},
 			metadata: textChannel,
 		};
