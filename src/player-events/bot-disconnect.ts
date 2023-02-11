@@ -10,6 +10,8 @@ class BotDisconnect implements PlayerEvent {
 		if (!queue.metadata) return;
 		const channel = queue.metadata;
 
+		queue.destroy();
+
 		const embedMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('😿 | Disconnect')
