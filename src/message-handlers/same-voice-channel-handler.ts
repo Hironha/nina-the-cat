@@ -15,7 +15,7 @@ export class SameVoiceChannelHandler extends MessageHandler {
 		client: DiscordClient<boolean>
 	): Promise<void> {
 		if (PlayerInteractionUtils.isFromListener(interaction)) {
-			await super.handle(interaction, client);
+			return await super.handle(interaction, client);
 		}
 
 		await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });

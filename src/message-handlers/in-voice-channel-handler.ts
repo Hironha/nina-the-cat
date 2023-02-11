@@ -21,7 +21,7 @@ export class InVoiceChannelHandler extends MessageHandler {
 	): Promise<void> {
 		if (interaction.isRepliable() && this.isMember(interaction.member)) {
 			if (!interaction.member.voice.channel) {
-				await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });
+				return await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });
 			}
 		}
 
