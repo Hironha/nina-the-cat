@@ -10,14 +10,16 @@ class BotDisconnect implements PlayerEvent {
 		if (!queue.metadata) return;
 		const channel = queue.metadata;
 
-		queue.destroy();
-
 		const embedMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('😿 | Disconnect')
 			.setDescription('I was disconnected from the voice channel, clearing queue!');
 
-		channel.send({ embeds: [embedMessage] });
+		await channel.send({ embeds: [embedMessage] });
+
+		if (!queue.destroyed) {
+			queue.destroy();
+		}
 	}
 }
 

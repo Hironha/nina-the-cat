@@ -17,7 +17,8 @@ class TrackStart implements PlayerEvent {
 			.setDescription(
 				`▶ | Started playing ${bold(track.title)} in ${bold(queue.connection.channel.name)}!`
 			);
-		channel.send({ embeds: [message] });
+
+		await channel.send({ embeds: [message] });
 	}
 }
 

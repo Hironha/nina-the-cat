@@ -10,14 +10,16 @@ class QueueEnd implements PlayerEvent {
 		if (!queue.metadata) return;
 		const channel = queue.metadata;
 
-		queue.destroy(true);
-
 		const embedMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('😽 | Finished')
 			.setDescription('I finished playing all songs that were in queue!');
 
-		channel.send({ embeds: [embedMessage] });
+		await channel.send({ embeds: [embedMessage] });
+
+		if (!queue.destroyed) {
+			queue.destroy(true);
+		}
 	}
 }
 
