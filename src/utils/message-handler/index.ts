@@ -22,8 +22,7 @@ export abstract class MessageHandler {
 
 	async handle(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (this.nextHandler) {
-			this.nextHandler.handle(interaction, client);
-			interaction.reply({});
+			return await this.nextHandler.handle(interaction, client);
 		}
 	}
 
