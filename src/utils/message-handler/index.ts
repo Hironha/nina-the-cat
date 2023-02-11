@@ -15,10 +15,6 @@ export abstract class MessageHandler {
 		this.method = method ?? 'reply';
 	}
 
-	fallback(handler: MessageHandler): void {
-		this.nextHandler = handler;
-	}
-
 	next(nextHandler: MessageHandler): MessageHandler {
 		this.nextHandler = nextHandler;
 		return nextHandler;
