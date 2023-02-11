@@ -6,8 +6,8 @@ import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handl
 type Options = {}
 
 export class SameVoiceChannelHandler extends MessageHandler {
-	constructor(options: MessageHandlerOptions<Options>) {
-		super(options.method ?? 'reply');
+	constructor(options?: MessageHandlerOptions<Options>) {
+		super(options?.method ?? 'reply');
 	}
 
 	async handle(

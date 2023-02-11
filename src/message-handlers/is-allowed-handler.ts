@@ -10,10 +10,10 @@ type Options = {
 export class IsAllowedHandler extends MessageHandler {
 	private options: Required<Options>;
 
-	constructor(options: MessageHandlerOptions<Options>) {
-		super(options.method ?? 'reply');
+	constructor(options?: MessageHandlerOptions<Options>) {
+		super(options?.method ?? 'reply');
 		this.options = {
-			fromGuild: options.fromGuild ?? true,
+			fromGuild: options?.fromGuild ?? true,
 		};
 	}
 

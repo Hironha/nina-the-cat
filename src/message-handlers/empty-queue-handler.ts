@@ -5,8 +5,8 @@ import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handl
 type Options = {};
 
 export class EmptyQueueHandler extends MessageHandler {
-	constructor(options: MessageHandlerOptions<Options>) {
-		super(options.method ?? 'reply');
+	constructor(options?: MessageHandlerOptions<Options>) {
+		super(options?.method ?? 'reply');
 	}
 
 	async handle(
@@ -17,7 +17,7 @@ export class EmptyQueueHandler extends MessageHandler {
 			const queue = client.player.getQueue(interaction.guild.id);
 			const isQueueEmpty = queue?.tracks.length === 0 && !queue?.playing;
 			if (!queue || isQueueEmpty) {
-				await this.reply(interaction, { embeds: this.buildEmbedMessage() });
+				return await this.reply(interaction, { embeds: this.buildEmbedMessage() });
 			}
 		}
 
