@@ -149,7 +149,7 @@ class Play extends Command {
 			ytdlOptions: {
 				quality: 'highest',
 				filter: 'audioonly',
-				highWaterMark: 1 << 30,
+				highWaterMark: 10_000_000,
 				dlChunkSize: 0,
 			},
 			metadata: textChannel,
