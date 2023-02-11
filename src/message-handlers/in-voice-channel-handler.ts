@@ -21,14 +21,14 @@ export class InVoiceChannelHandler extends MessageHandler {
 	): Promise<void> {
 		if (interaction.isRepliable() && this.isMember(interaction.member)) {
 			if (!interaction.member.voice.channel) {
-				await this.reply(interaction, { embeds: this.buildEmbeds(), ephemeral: true });
+				await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });
 			}
 		}
 
 		await super.handle(interaction, client);
 	}
 
-	private buildEmbeds(): EmbedBuilder[] {
+	private buildEmbedMessage(): EmbedBuilder[] {
 		const message = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('🐱 | Confused')

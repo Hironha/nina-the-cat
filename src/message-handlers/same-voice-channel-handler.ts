@@ -18,10 +18,10 @@ export class SameVoiceChannelHandler extends MessageHandler {
 			await super.handle(interaction, client);
 		}
 
-		await this.reply(interaction, { embeds: this.buildEmbeds(), ephemeral: true });
+		await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });
 	}
 
-	private buildEmbeds(): EmbedBuilder[] {
+	private buildEmbedMessage(): EmbedBuilder[] {
 		const message = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('🐱 | Warning')
