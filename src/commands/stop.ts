@@ -29,7 +29,7 @@ class Stop extends Command {
 
 		queue.value.clear();
 		queue.value.stop();
-		client.player.deleteQueue(guild.value.id);
+		queue.value.destroy();
 
 		interaction.reply({ embeds: [this.buildStopMessage()] });
 	}
