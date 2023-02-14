@@ -13,7 +13,7 @@ class Clear extends Command {
 		this.setName('clear').setDescription('Clear all songs in queue');
 	}
 
-	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
+	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (interaction.isRepliable()) {
 			await interaction.deferReply();
 		}
