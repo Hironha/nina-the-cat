@@ -5,7 +5,6 @@ import { MessageHandlersChain } from '@utils/message-handler/message-handlers-ch
 import { ClearHandler } from '@message-handlers/clear-handler';
 import { EmptyQueueHandler } from '@message-handlers/empty-queue-handler';
 import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
-import { IsAllowedHandler } from '@message-handlers/is-allowed-handler';
 import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
 
 class Clear extends Command {
@@ -21,13 +20,12 @@ class Clear extends Command {
 
 		const commonOptions = { method: 'edit-reply' } as const;
 
-		const chainHandler = new MessageHandlersChain(new IsAllowedHandler(commonOptions))
-			.next(new InVoiceChannelHandler(commonOptions))
+		await new MessageHandlersChain(new InVoiceChannelHandler(commonOptions))
 			.next(new SameVoiceChannelHandler(commonOptions))
 			.next(new EmptyQueueHandler(commonOptions))
-			.next(new ClearHandler(commonOptions));
-
-		await chainHandler.run(interaction, client);
+			.next(new ClearHandler(commonOptions))
+			.build()
+			.handle(interaction, client);
 	}
 }
 

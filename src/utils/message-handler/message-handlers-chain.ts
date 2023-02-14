@@ -18,8 +18,7 @@ export class MessageHandlersChain {
 		return this;
 	}
 
-	run(...params: Parameters<MessageHandler['handle']>): ReturnType<MessageHandler['handle']> {
-		const [interaction, client] = params;
-		return this.initial.handle(interaction, client);
+	build(): MessageHandler {
+		return this.initial;
 	}
 }

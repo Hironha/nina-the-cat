@@ -5,6 +5,7 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
+import { isMember } from '@utils/interaction-guards';
 import { type DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
@@ -19,7 +20,7 @@ export class InVoiceChannelHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (interaction.isRepliable() && this.isMember(interaction.member)) {
+		if (interaction.isRepliable() && isMember(interaction.member)) {
 			if (!interaction.member.voice.channel) {
 				return await this.reply(interaction, { embeds: this.buildEmbedMessage(), ephemeral: true });
 			}
@@ -35,10 +36,5 @@ export class InVoiceChannelHandler extends MessageHandler {
 			.setDescription("You're not in a voice channel?!");
 
 		return [message];
-	}
-
-	private isMember(member: ChatInputCommandInteraction['member']): member is GuildMember {
-		if (!member) return false;
-		return member instanceof GuildMember;
 	}
 }
