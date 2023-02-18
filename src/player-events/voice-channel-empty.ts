@@ -17,7 +17,9 @@ class VoiceChannelEmpty implements PlayerEvent {
 
 		await channel.send({ embeds: [embedMessage] });
 
-		queue.destroy(true);
+		if (!queue.destroyed) {
+			queue.destroy(true);
+		}
 	}
 }
 
