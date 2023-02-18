@@ -147,11 +147,12 @@ class Play extends Command {
 	): PlayerOptions & { metadata: TextBasedChannel } {
 		return {
 			ytdlOptions: {
-				quality: 'highest',
+				quality: 'highestaudio',
 				filter: 'audioonly',
 				highWaterMark: 10_000_000,
 				dlChunkSize: 0,
 			},
+			leaveOnEmpty: true,
 			metadata: textChannel,
 		};
 	}
