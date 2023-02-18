@@ -12,7 +12,7 @@ class VoiceChannelEmpty implements PlayerEvent {
 
 		const embedMessage = new EmbedBuilder()
 			.setColor(Colors.Blue)
-			.setTitle('😿 | Alone')
+			.setTitle('😿 | Lonely')
 			.setDescription("Nobody is in the voice channel with me, so I'm leaving...");
 
 		await channel.send({ embeds: [embedMessage] });
