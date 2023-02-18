@@ -13,7 +13,7 @@ class NowPlaying extends Command {
 		this.setName('nowplaying').setDescription('Show information about the playing song');
 	}
 
-	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient) {
+	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
 		if (interaction.isRepliable()) {
 			await interaction.deferReply();
 		}
