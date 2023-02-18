@@ -11,14 +11,10 @@ class InteractionCreate implements Event {
 		if (!interaction.isChatInputCommand()) return;
 
 		const command = client.commands.get(interaction.commandName);
-		try {
-			if (command) {
-				command.execute(interaction, client).catch(err => console.error(err));
-			} else {
-				console.log(`Command ${interaction.commandName} not found`);
-			}
-		} catch (err) {
-			console.error(err);
+		if (command) {
+			await command.execute(interaction, client).catch(err => console.error(err));
+		} else {
+			console.log(`Command ${interaction.commandName} not found`);
 		}
 	}
 }
