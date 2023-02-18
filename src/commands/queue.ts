@@ -1,10 +1,10 @@
-import { type Queue as PlayerQueue } from 'discord-player';
-import { bold, Colors, EmbedBuilder, type APIEmbedField } from 'discord.js';
-
-import { intoChunk } from '@utils/chunk';
 import { type DiscordClient } from '@utils/discord-client';
-import { PlayerInteractionUtils } from '@utils/player-interaction';
+import { type MessageHandlerOptions } from '@utils/message-handler';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
+import { ListQueueHandler } from '@message-handlers/list-queue-handler';
+import { MessageHandlersChain } from '@utils/message-handler/message-handlers-chain';
+import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
+import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
 
 class Queue extends Command {
 	constructor() {
@@ -13,42 +13,17 @@ class Queue extends Command {
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
-		if (!interaction.isRepliable() || !client.player) return;
-
-		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) return void interaction.reply(guild.value);
-
-		const { player } = client;
-
-		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.value.id);
-		if (queue.isLeft()) return void interaction.reply(queue.value);
-
-		const queueEmbedMessage = this.buildQueueEmbedMessage(queue.value);
-		interaction.reply({ embeds: queueEmbedMessage }).catch(err => console.error(err));
-	}
-
-	private buildQueueEmbedMessage(queue: PlayerQueue) {
-		const trackFields: APIEmbedField[] = queue.tracks.map((track, index) => ({
-			name: `${index + 1}.`,
-			value: bold(track.title),
-			inline: false,
-		}));
-
-		if (queue.playing && queue.current) {
-			trackFields.unshift({
-				name: '🎶 Current Song',
-				value: bold(queue.current.title),
-				inline: false,
-			});
+		if (interaction.isRepliable()) {
+			await interaction.deferReply();
 		}
 
-		const embedMessages = intoChunk(trackFields, 20).map((chunk, index) => {
-			let embed = new EmbedBuilder().setColor(Colors.Blue).setFields(chunk);
-			if (index !== 0) return embed;
-			return embed.setTitle('🐱 | Songs in Queue');
-		});
+		const options: MessageHandlerOptions<{}> = { method: 'edit-reply' };
 
-		return embedMessages;
+		await new MessageHandlersChain(new InVoiceChannelHandler(options))
+			.next(new SameVoiceChannelHandler(options))
+			.next(new ListQueueHandler(options))
+			.build()
+			.handle(interaction, client);
 	}
 }
 
