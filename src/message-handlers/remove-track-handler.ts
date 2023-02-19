@@ -29,7 +29,6 @@ export class RemoveTrackHandler extends MessageHandler {
 		if (!queue) return super.handle(interaction, client);
 
 		const removableTrackPosition = this.getRemovableTrackPosition(interaction, queue);
-
 		if (!removableTrackPosition) {
 			return super.reply(interaction, { content: '😿 | Invalid song!' });
 		}
