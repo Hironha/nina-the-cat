@@ -28,25 +28,18 @@ export class RemoveTrackHandler extends MessageHandler {
 		const queue = client.player.getQueue(interaction.guild.id);
 		if (!queue) return super.handle(interaction, client);
 
-		const removableTrackPosition = this.getRemovableTrackPosition(interaction, queue);
-		if (!removableTrackPosition) {
+		const trackIndicator = interaction.options.getInteger('song');
+		const trackIndex = trackIndicator ? trackIndicator - 1 : null;
+		if (trackIndex === null || !this.validateTrackIndex(trackIndex)) {
 			return super.reply(interaction, { content: '😿 | Invalid song!' });
 		}
 
-		const removedTrack = queue.remove(removableTrackPosition);
+		const removedTrack = queue.remove(trackIndex);
 		return super.reply(interaction, { embeds: this.buildEmbedMessage(removedTrack) });
 	}
 
-	private getRemovableTrackPosition(
-		interaction: ChatInputCommandInteraction<CacheType>,
-		queue: Queue
-	): number | null {
-		const trackIndex = interaction.options.getInteger('song');
-		if (trackIndex === null || !Number.isInteger(trackIndex) || trackIndex < 1) {
-			return null;
-		}
-		const trackPosition = queue.getTrackPosition(trackIndex);
-		return trackPosition < 0 ? null : trackPosition;
+	private validateTrackIndex(index: number): boolean {
+		return Number.isInteger(index) && index > 0;
 	}
 
 	private buildEmbedMessage(removedTrack: Track): EmbedBuilder[] {
