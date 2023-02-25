@@ -23,9 +23,9 @@ export class PlayerEventUtils {
 	}
 
 	static attach(player: Player, events: PlayerEvent[]): Player {
-		const createEventExecuter = (event: PlayerEvent) => {
-			return (...args: any[]) => {
-				event.execute(...args).catch(err => console.error(err));
+		const createEventExecuter = (event: PlayerEvent): ((...args: any[]) => Promise<void>) => {
+			return async (...args: any[]) => {
+				return event.execute(...args).catch(err => console.error(err));
 			};
 		};
 
