@@ -1,13 +1,12 @@
-import { EmbedBuilder, Colors, type InteractionReplyOptions, type Guild } from 'discord.js';
+import { type MessageHandlerOptions } from '@utils/message-handler';
+import { EmptyQueueHandler } from '@message-handlers/empty-queue-handler';
+import { ShuffleQueueHandler } from '@message-handlers/shuffle-queue-handler';
+import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
+import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
+import { MessageHandlersChain } from '@utils/message-handler/message-handlers-chain';
 
-import { right, type Either } from '@utils/flow';
 import { type DiscordClient } from '@utils/discord-client';
-import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
-
-type InteractionProperties = {
-	guild: Guild;
-};
 
 class Shuffle extends Command {
 	constructor() {
@@ -16,48 +15,17 @@ class Shuffle extends Command {
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
-		if (!interaction.isRepliable() || !client.player) return;
-
-		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
-			return void interaction.reply({ content: "You're not a guild member!", ephemeral: true });
+		if (interaction.isRepliable()) {
+			await interaction.deferReply();
 		}
 
-		const interactionProperties = this.getInteractionProperties(interaction);
-		if (interactionProperties.isLeft()) {
-			return void interaction.reply(interactionProperties.value);
-		}
-
-		await interaction.deferReply();
-
-		const { player } = client;
-		const { guild } = interactionProperties.value;
-
-		const queue = PlayerInteractionUtils.getPlayerQueue(player, guild.id);
-		if (queue.isLeft()) {
-			return void interaction.editReply(queue.value);
-		}
-
-		if (!queue.value.shuffle()) {
-			return void interaction.editReply({ content: "It wasn't possible to shuffle the queue" });
-		}
-
-		interaction.editReply({ embeds: [this.buildShuffleEmbedMessage()] });
-	}
-
-	private buildShuffleEmbedMessage() {
-		return new EmbedBuilder()
-			.setColor(Colors.Blue)
-			.setTitle('Shuffle')
-			.setDescription('All songs in queue were shuffled');
-	}
-
-	private getInteractionProperties(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, InteractionProperties> {
-		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) return guild;
-
-		return right({ guild: guild.value });
+		const options: MessageHandlerOptions<{}> = { method: 'edit-reply' };
+		await new MessageHandlersChain(new InVoiceChannelHandler(options))
+			.next(new SameVoiceChannelHandler(options))
+			.next(new EmptyQueueHandler(options))
+			.next(new ShuffleQueueHandler(options))
+			.build()
+			.handle(interaction, client);
 	}
 }
 
