@@ -1,4 +1,4 @@
-import { GuildMember, type ChatInputCommandInteraction, type CacheType } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 export function isMember(member: unknown): member is GuildMember {
 	if (!member) return false;
