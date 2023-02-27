@@ -13,7 +13,7 @@ class Help extends Command {
 			await interaction.deferReply();
 		}
 
-		new HelpHandler({ method: 'edit-reply' }).handle(interaction, client);
+		await new HelpHandler({ method: 'edit-reply' }).handle(interaction, client);
 	}
 }
 
