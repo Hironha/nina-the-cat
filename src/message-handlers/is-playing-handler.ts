@@ -16,11 +16,11 @@ export class IsPlayingHandler extends MessageHandler {
 		if (interaction.isRepliable() && interaction.guild && client.player) {
 			const queue = client.player.getQueue(interaction.guild.id);
 			if (queue?.playing && queue.current) {
-				return void super.handle(interaction, client);
+				return super.handle(interaction, client);
 			}
 		}
 
-		return void (await super.reply(interaction, { embeds: this.buildEmbedMessage() }));
+		await super.reply(interaction, { embeds: this.buildEmbedMessage() });
 	}
 
 	private buildEmbedMessage(): EmbedBuilder[] {
