@@ -23,14 +23,16 @@ export class ListQueueHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (interaction.isRepliable() && interaction.guild && client.player) {
-			const queue = client.player.getQueue(interaction.guild.id);
-			if (queue) {
-				return await super.reply(interaction, { embeds: this.buildEmbedMessage(queue) });
-			}
+		if (!interaction.isRepliable() || !interaction.guild || !client.player) {
+			return super.handle(interaction, client);
 		}
 
-		await super.handle(interaction, client);
+		const queue = client.player.getQueue(interaction.guild.id);
+		if (!queue) {
+			return super.handle(interaction, client);
+		}
+
+		return await super.reply(interaction, { embeds: this.buildEmbedMessage(queue) });
 	}
 
 	private buildEmbedMessage(queue: Queue): EmbedBuilder[] {
