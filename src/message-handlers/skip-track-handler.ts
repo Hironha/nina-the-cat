@@ -42,7 +42,7 @@ export class SkipTrackHandler extends MessageHandler {
 		const skipTo = skipIndex >= queue.tracks.length - 1 ? queue.tracks.length - 1 : skipIndex;
 		const skippedTracks = [queue.current].concat(queue.tracks.slice(0, skipTo));
 		queue.skipTo(skipTo);
-		super.reply(interaction, { embeds: this.buildEmbedMessage(skippedTracks) });
+		await super.reply(interaction, { embeds: this.buildEmbedMessage(skippedTracks) });
 	}
 
 	private getSkipAmount(interaction: ChatInputCommandInteraction): number {
