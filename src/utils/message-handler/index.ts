@@ -7,7 +7,11 @@ export type MessageHandlerOptions<T extends {}> = T & {
 	method?: ReplyMethod;
 };
 
-export abstract class MessageHandler {
+export interface Handler {
+	handle(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void>;
+}
+
+export abstract class MessageHandler implements Handler {
 	protected nextHandler: MessageHandler | null = null;
 	protected method: ReplyMethod;
 

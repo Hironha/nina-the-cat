@@ -1,4 +1,4 @@
-import { type MessageHandler } from '.';
+import { type MessageHandler, type Handler } from '.';
 
 export class MessageHandlersChain {
 	private initial: MessageHandler;
@@ -18,7 +18,7 @@ export class MessageHandlersChain {
 		return this;
 	}
 
-	build(): MessageHandler {
+	build(): Handler {
 		return this.initial;
 	}
 }
