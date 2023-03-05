@@ -56,11 +56,9 @@ export class CommandUtils {
 		if (guildId) {
 			data = await rest
 				.put(Routes.applicationGuildCommands(clientId, guildId), { body })
-				.catch(err => console.error(err));
+				.catch(console.error);
 		} else {
-			data = await rest
-				.put(Routes.applicationCommands(clientId), { body })
-				.catch(err => console.error(err));
+			data = await rest.put(Routes.applicationCommands(clientId), { body }).catch(console.error);
 		}
 
 		console.log(`Successfully reloaded ${data?.length} application (/) commands.`);
