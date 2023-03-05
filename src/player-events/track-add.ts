@@ -15,7 +15,7 @@ class TrackAdd implements PlayerEvent {
 			.setTitle('🐱 | Add Track')
 			.setDescription(`Track ${bold(track.title)} queued!`);
 
-		channel.send({ embeds: [embedMessage] });
+		await channel.send({ embeds: [embedMessage] });
 	}
 }
 

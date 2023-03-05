@@ -15,7 +15,11 @@ class BotDisconnect implements PlayerEvent {
 			.setTitle('😿 | Disconnect')
 			.setDescription('I was disconnected from the voice channel, clearing queue!');
 
-		channel.send({ embeds: [embedMessage] });
+		await channel.send({ embeds: [embedMessage] });
+
+		if (!queue.destroyed) {
+			queue.destroy();
+		}
 	}
 }
 

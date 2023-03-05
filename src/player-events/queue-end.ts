@@ -15,7 +15,11 @@ class QueueEnd implements PlayerEvent {
 			.setTitle('😽 | Finished')
 			.setDescription('I finished playing all songs that were in queue!');
 
-		channel.send({ embeds: [embedMessage] });
+		await channel.send({ embeds: [embedMessage] });
+
+		if (!queue.destroyed) {
+			queue.destroy(true);
+		}
 	}
 }
 

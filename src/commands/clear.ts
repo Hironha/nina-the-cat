@@ -1,10 +1,11 @@
-import { Colors, InteractionReplyOptions } from 'discord.js';
-import { EmbedBuilder } from '@discordjs/builders';
-
-import { left, right, type Either } from '@utils/flow';
 import { type DiscordClient } from '@utils/discord-client';
-import { PlayerInteractionUtils } from '@utils/player-interaction';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
+
+import { MessageHandlersChain } from '@utils/message-handler/message-handlers-chain';
+import { ClearHandler } from '@message-handlers/clear-handler';
+import { EmptyQueueHandler } from '@message-handlers/empty-queue-handler';
+import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
+import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
 
 class Clear extends Command {
 	constructor() {
@@ -13,47 +14,18 @@ class Clear extends Command {
 	}
 
 	async execute(interaction: ChatInputCommandInteraction, client: DiscordClient): Promise<void> {
-		if (!interaction.isRepliable() || !client.player) return;
-
-		const interactionValidation = this.validateInteraction(interaction);
-		if (interactionValidation.isLeft()) return void interaction.reply(interactionValidation.value);
-
-		const guild = PlayerInteractionUtils.getGuild(interaction);
-		if (guild.isLeft()) return void interaction.reply(guild.value);
-
-		const queue = PlayerInteractionUtils.getPlayerQueue(client.player, guild.value.id);
-		if (queue.isLeft()) return void interaction.reply(queue.value);
-
-		queue.value.clear();
-
-		interaction.reply({ embeds: [this.buildClearEmbedMessage()] });
-	}
-
-	private buildClearEmbedMessage() {
-		return new EmbedBuilder()
-			.setColor(Colors.Blue)
-			.setTitle('🐱 | Clear')
-			.setDescription('Queue is now empty');
-	}
-
-	private validateInteraction(
-		interaction: ChatInputCommandInteraction
-	): Either<InteractionReplyOptions, true> {
-		if (!PlayerInteractionUtils.isFromGuildMember(interaction)) {
-			return left({
-				content: "You're not allowed to use this command",
-				ephemeral: true,
-			});
+		if (interaction.isRepliable()) {
+			await interaction.deferReply();
 		}
 
-		if (!PlayerInteractionUtils.isFromListener(interaction)) {
-			return left({
-				content: "You're not in the same voice channel as me",
-				ephemeral: true,
-			});
-		}
+		const commonOptions = { method: 'edit-reply' } as const;
 
-		return right<true>(true);
+		await new MessageHandlersChain(new InVoiceChannelHandler(commonOptions))
+			.next(new SameVoiceChannelHandler(commonOptions))
+			.next(new EmptyQueueHandler(commonOptions))
+			.next(new ClearHandler(commonOptions))
+			.build()
+			.handle(interaction, client);
 	}
 }
 
