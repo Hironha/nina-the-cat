@@ -104,7 +104,7 @@ export class PlayTrackHandler extends MessageHandler {
 			ytdlOptions: {
 				quality: 'highestaudio',
 				filter: 'audioonly',
-				highWaterMark: 2 ** 16,
+				highWaterMark: 2 ** 20,
 				dlChunkSize: 0,
 			},
 			leaveOnEmpty: true,
