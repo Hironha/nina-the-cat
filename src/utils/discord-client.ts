@@ -1,10 +1,8 @@
 import { Client, Collection, type ClientOptions } from 'discord.js';
 
-import { Player } from 'discord-player';
 import { type Command } from './command/command';
 
 export class DiscordClient<Ready extends boolean = boolean> extends Client<Ready> {
-	public player: Player | undefined;
 	private _commands: Collection<string, Command>;
 
 	constructor(options: ClientOptions) {
@@ -16,7 +14,13 @@ export class DiscordClient<Ready extends boolean = boolean> extends Client<Ready
 		return this._commands;
 	}
 
-	set commands(commands: Collection<string, Command>) {
-		this._commands = commands;
+	set commands(commands: Collection<string, Command> | Array<Command>) {
+		if (Array.isArray(commands)) {
+			const collection = new Collection<string, Command>();
+			commands.forEach(command => collection.set(command.name, command));
+			this.commands = collection;
+		} else {
+			this._commands = commands;
+		}
 	}
 }

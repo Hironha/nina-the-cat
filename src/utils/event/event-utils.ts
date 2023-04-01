@@ -8,7 +8,7 @@ import { type Event } from './event';
 export class EventUtils {
 	private constructor() {}
 
-	static async loadEvents(): Promise<Event[]> {
+	static async load(): Promise<Event[]> {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/events/*{.js,.ts}`;
 

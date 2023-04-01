@@ -10,11 +10,10 @@ class ClientReady implements Event {
 	public name: keyof ClientEvents = Events.ClientReady;
 
 	async execute(client: DiscordClient): Promise<void> {
-		const commands = await CommandUtils.loadCommands();
-		client.commands = CommandUtils.collect(commands);
+		client.commands = await CommandUtils.load();
 
 		if (Environment.getPublishCommands()) {
-			await CommandUtils.publish(commands);
+			await CommandUtils.publish(client.commands);
 		}
 
 		console.log('Ready to serve you, nya!');

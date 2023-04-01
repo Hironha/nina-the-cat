@@ -16,14 +16,12 @@ async function main() {
 		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 	});
 
-	const events = await EventUtils.loadEvents();
+	const events = await EventUtils.load();
 	EventUtils.attach(client, events);
 
 	const player = new Player(client);
 	const playerEvents = await PlayerEventUtils.loadEvents();
 	PlayerEventUtils.attach(player, playerEvents);
-
-	client.player = player;
 
 	client.login(token);
 }

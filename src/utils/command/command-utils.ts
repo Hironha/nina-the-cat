@@ -1,6 +1,6 @@
 import glob from 'glob';
 import { promisify } from 'util';
-import { Collection, REST, Routes } from 'discord.js';
+import { REST, Routes, type Collection } from 'discord.js';
 
 import { getSRCPath } from '@utils/path';
 import { Environment } from '@utils/environment';
@@ -15,7 +15,7 @@ function isCommand(data: unknown): data is Command {
 	return false;
 }
 export class CommandUtils {
-	static async loadCommands(): Promise<Command[]> {
+	static async load(): Promise<Command[]> {
 		const globPromise = promisify(glob);
 		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
 		const commandFiles = await globPromise(directoryFiles);
@@ -23,8 +23,8 @@ export class CommandUtils {
 		const commandPromises = commandFiles.map(async file => {
 			const importedFile = await import(file);
 			const command: unknown = importedFile.default;
-			if (!isCommand(command)) return null;
 
+			if (!isCommand(command)) return null;
 			if (command.isDevOnly()) return Environment.isDevelopment() ? command : null;
 			return command;
 		});
@@ -33,13 +33,7 @@ export class CommandUtils {
 		return commands.filter((command): command is Command => Boolean(command));
 	}
 
-	static collect(commands: Command[]): Collection<string, Command> {
-		const collection = new Collection<string, Command>();
-		commands.forEach(command => collection.set(command.name, command));
-		return collection;
-	}
-
-	static async publish(commands: Command[]): Promise<void> {
+	static async publish(commands: Collection<string, Command>): Promise<void> {
 		const guildId = Environment.getGuildId();
 		const clientId = Environment.getClientId();
 		const token = Environment.getDiscordBotToken();
@@ -48,11 +42,9 @@ export class CommandUtils {
 		if (!clientId) throw new Error('CLIENT_ID not declared in environment');
 
 		const rest = new REST({ version: '10' }).setToken(token);
-
 		const body = commands.map(command => command.toJSON());
 
 		let data: any = null;
-
 		if (guildId) {
 			data = await rest
 				.put(Routes.applicationGuildCommands(clientId, guildId), { body })
