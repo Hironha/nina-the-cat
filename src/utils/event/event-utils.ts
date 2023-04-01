@@ -1,25 +1,13 @@
-import glob from 'glob';
-import { promisify } from 'util';
-import { getSRCPath } from '@utils/path';
-
 import { type DiscordClient } from '@utils/discord-client';
+import { ClientReady } from '@events/client-ready';
+import { InteractionCreate } from '@events/interaction-create';
 import { type Event } from './event';
 
 export class EventUtils {
 	private constructor() {}
 
-	static async load(): Promise<Event[]> {
-		const globPromise = promisify(glob);
-		const directoryFiles = `${getSRCPath()}/events/*{.js,.ts}`;
-
-		const eventFiles = await globPromise(directoryFiles);
-
-		const eventPromises: Promise<Event>[] = eventFiles.map(async file => {
-			const importedFile = await import(file);
-			return importedFile.default;
-		});
-
-		return await Promise.all(eventPromises);
+	static load(): Event[] {
+		return [new ClientReady(), new InteractionCreate()];
 	}
 
 	static attach(client: DiscordClient, events: Event[]): DiscordClient {

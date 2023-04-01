@@ -5,7 +5,7 @@ import { Environment } from '@utils/environment';
 import { type Event } from '@utils/event';
 import { type DiscordClient } from '@utils/discord-client';
 
-class ClientReady implements Event {
+export class ClientReady implements Event {
 	public once = true;
 	public name: keyof ClientEvents = Events.ClientReady;
 
@@ -19,5 +19,3 @@ class ClientReady implements Event {
 		console.log('Ready to serve you, nya!');
 	}
 }
-
-export default new ClientReady();

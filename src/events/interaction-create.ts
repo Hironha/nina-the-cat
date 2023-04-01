@@ -3,7 +3,7 @@ import { Events, type Interaction, type ClientEvents } from 'discord.js';
 import { type Event } from '@utils/event';
 import { type DiscordClient } from '@utils/discord-client';
 
-class InteractionCreate implements Event {
+export class InteractionCreate implements Event {
 	public once = false;
 	public name: keyof ClientEvents = Events.InteractionCreate;
 
@@ -18,5 +18,3 @@ class InteractionCreate implements Event {
 		}
 	}
 }
-
-export default new InteractionCreate();

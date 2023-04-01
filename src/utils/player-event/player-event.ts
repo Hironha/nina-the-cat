@@ -1,7 +1,6 @@
-import { type PlayerEvents } from 'discord-player';
+import { type GuildQueueEvent } from 'discord-player';
 
-export interface PlayerEvent {
-	readonly name: keyof PlayerEvents;
-	readonly once: boolean;
+export type PlayerEvent = {
+	readonly name: GuildQueueEvent;
 	execute(...args: any[]): Promise<void>;
-}
+};
