@@ -1,4 +1,4 @@
-import { type Track } from 'discord-player';
+import { Player, type Track } from 'discord-player';
 import {
 	bold,
 	Colors,
@@ -23,25 +23,29 @@ export class SkipTrackHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (!interaction.isRepliable() || !client.player || !interaction.guild) {
+		if (!interaction.isRepliable() || !interaction.guild) {
 			return super.handle(interaction, client);
 		}
 
-		const queue = client.player.getQueue(interaction.guild.id);
-		if (!queue || !queue.playing) return super.handle(interaction, client);
+		const player = Player.singleton(client);
+		const queue = player.nodes.get(interaction.guild.id);
+
+		if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
+			return super.handle(interaction, client);
+		}
 
 		const skipIndex = this.getSkipAmount(interaction) - 1;
 		if (skipIndex === 0) {
-			const currentTrack = queue.current;
-			if (!queue.skip()) {
+			if (!queue.node.skip()) {
 				return super.reply(interaction, { content: 'I failed to skip the current song, sorry' });
 			}
-			return super.reply(interaction, { embeds: this.buildEmbedMessage([currentTrack]) });
+			return super.reply(interaction, { embeds: this.buildEmbedMessage([queue.currentTrack]) });
 		}
 
-		const skipTo = skipIndex >= queue.tracks.length - 1 ? queue.tracks.length - 1 : skipIndex;
-		const skippedTracks = [queue.current].concat(queue.tracks.slice(0, skipTo));
-		queue.skipTo(skipTo);
+		const skipTo = skipIndex >= queue.tracks.size - 1 ? queue.tracks.size - 1 : skipIndex;
+
+		const skippedTracks = [queue.currentTrack].concat(queue.tracks.map(t => t).slice(0, skipTo));
+		queue.node.skipTo(skipTo);
 		await super.reply(interaction, { embeds: this.buildEmbedMessage(skippedTracks) });
 	}
 

@@ -1,3 +1,4 @@
+import { Player } from 'discord-player';
 import { Colors, EmbedBuilder, type ChatInputCommandInteraction, type CacheType } from 'discord.js';
 
 import { type DiscordClient } from '@utils/discord-client';
@@ -14,18 +15,15 @@ export class ShuffleQueueHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (!interaction.isRepliable() || !client.player || !interaction.guild) {
+		if (!interaction.isRepliable() || !interaction.guild) {
 			return super.handle(interaction, client);
 		}
 
-		const queue = client.player.getQueue(interaction.guild.id);
+		const player = Player.singleton(client);
+		const queue = player.nodes.get(interaction.guild.id);
 		if (!queue) return super.handle(interaction, client);
 
-		if (!queue.shuffle()) {
-			const failMessage = "I couldn't shuffle the queue, sorry";
-			return super.reply(interaction, { content: failMessage });
-		}
-
+		queue.tracks.shuffle();
 		return super.reply(interaction, { embeds: this.buildEmbedMessage() });
 	}
 

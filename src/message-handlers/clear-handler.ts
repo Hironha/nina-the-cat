@@ -1,4 +1,5 @@
 import { type ChatInputCommandInteraction, type CacheType, EmbedBuilder, Colors } from 'discord.js';
+import { Player } from 'discord-player';
 import { type DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
@@ -13,9 +14,11 @@ export class ClearHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (interaction.isRepliable() && client.player && interaction.guild) {
+		if (interaction.isRepliable() && interaction.guild) {
+			const player = Player.singleton(client);
 			const guild = interaction.guild;
-			const queue = client.player.getQueue(guild.id);
+			const queue = player.nodes.get(guild.id);
+
 			if (queue) {
 				queue.clear();
 				return await this.reply(interaction, { embeds: this.buildEmbedMessage() });

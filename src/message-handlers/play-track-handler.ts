@@ -8,7 +8,7 @@ import {
 	type TextBasedChannel,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
-import { QueryType, type PlayerOptions } from 'discord-player';
+import { QueryType, Player, GuildNodeCreateOptions } from 'discord-player';
 
 import { isMember } from '@utils/interaction-guards';
 import { DiscordClient } from '@utils/discord-client';
@@ -35,29 +35,27 @@ export class PlayTrackHandler extends MessageHandler {
 			return super.handle(interaction, client);
 		}
 
-		const { player } = client;
+		const player = Player.singleton(client);
 		const { guild, channel: textChannel, member } = interaction;
 		const { channel: voiceChannel } = member.voice;
 		const query = interaction.options.getString('query');
-		if (!voiceChannel || !player || !query) {
+		if (!voiceChannel || !query) {
 			return super.handle(interaction, client);
 		}
 
-		const curQueue = player.getQueue(guild.id);
-		const queue = curQueue ?? player.createQueue(guild, this.createPlayerOptions(textChannel));
+		const queue =
+			player.nodes.get(guild.id) ??
+			player.nodes.create(guild, this.createPlayerOptions(textChannel));
 
 		if (!queue.connection) {
 			if (!voiceChannel.joinable) {
-				player.deleteQueue(guild.id);
+				player.nodes.delete(guild.id);
 				return void interaction.followUp({
 					content: `I can't join the voice channel ${bold(voiceChannel.name)}`,
 				});
 			}
 
-			const connectionSuccess = await queue
-				.connect(voiceChannel)
-				.then(() => true)
-				.catch(() => false);
+			const connectionSuccess = await queue.connect(voiceChannel).catch(() => null);
 			if (!connectionSuccess) {
 				return void interaction.followUp({ content: 'Could not join your voice channel!' });
 			}
@@ -70,11 +68,11 @@ export class PlayTrackHandler extends MessageHandler {
 			searchEngine: QueryType.AUTO,
 		});
 
-		if (searchResult.playlist) queue.addTracks(searchResult.tracks);
+		if (searchResult.playlist) queue.addTrack(searchResult.tracks);
 		else queue.addTrack(searchResult.tracks[0]);
 
-		if (!queue.playing) {
-			await queue.play().catch(console.error);
+		if (!queue.node.isPlaying()) {
+			await queue.node.play().catch(console.error);
 		}
 	}
 
@@ -99,16 +97,12 @@ export class PlayTrackHandler extends MessageHandler {
 
 	private createPlayerOptions(
 		textChannel: TextBasedChannel
-	): PlayerOptions & { metadata: TextBasedChannel } {
+	): GuildNodeCreateOptions<TextBasedChannel> {
 		return {
-			ytdlOptions: {
-				quality: 'highestaudio',
-				filter: 'audioonly',
-				highWaterMark: 2 ** 20,
-				dlChunkSize: 0,
-			},
-			leaveOnEmpty: true,
 			metadata: textChannel,
+			leaveOnEmpty: true,
+			skipOnNoStream: true,
+			disableHistory: true,
 		};
 	}
 }

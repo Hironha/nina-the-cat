@@ -6,7 +6,7 @@ import {
 	type CacheType,
 	type APIEmbedField,
 } from 'discord.js';
-import { type Queue } from 'discord-player';
+import { Player, type GuildQueue } from 'discord-player';
 
 import { intoChunk } from '@utils/chunk';
 import { type DiscordClient } from '@utils/discord-client';
@@ -23,11 +23,12 @@ export class ListQueueHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (!interaction.isRepliable() || !interaction.guild || !client.player) {
+		if (!interaction.isRepliable() || !interaction.guild) {
 			return super.handle(interaction, client);
 		}
+		const player = Player.singleton(client);
+		const queue = player.nodes.get(interaction.guild.id);
 
-		const queue = client.player.getQueue(interaction.guild.id);
 		if (!queue) {
 			return super.handle(interaction, client);
 		}
@@ -35,17 +36,17 @@ export class ListQueueHandler extends MessageHandler {
 		return await super.reply(interaction, { embeds: this.buildEmbedMessage(queue) });
 	}
 
-	private buildEmbedMessage(queue: Queue): EmbedBuilder[] {
+	private buildEmbedMessage(queue: GuildQueue): EmbedBuilder[] {
 		const trackFields: APIEmbedField[] = queue.tracks.map((track, index) => ({
 			name: `${index + 1}.`,
 			value: bold(track.title),
 			inline: false,
 		}));
 
-		if (queue.playing && queue.current) {
+		if (queue.node.isPlaying() && queue.currentTrack) {
 			trackFields.unshift({
 				name: '🎶 Current Song',
-				value: bold(queue.current.title),
+				value: bold(queue.currentTrack.title),
 				inline: false,
 			});
 		}

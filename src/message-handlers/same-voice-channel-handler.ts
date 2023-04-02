@@ -1,6 +1,8 @@
 import { type ChatInputCommandInteraction, type CacheType, EmbedBuilder, Colors } from 'discord.js';
-import { type DiscordClient } from '@utils/discord-client';
+import { Player } from 'discord-player';
+
 import { isMember } from '@utils/interaction-guards';
+import { type DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
 type Options = {};
@@ -15,19 +17,20 @@ export class SameVoiceChannelHandler extends MessageHandler {
 		client: DiscordClient<boolean>
 	): Promise<void> {
 		if (interaction.isRepliable()) {
-			if (client.player && isMember(interaction.member) && interaction.guild) {
+			if (isMember(interaction.member) && interaction.guild) {
+				const player = Player.singleton(client);
 				const listenerVoiceChannel = interaction.member.voice.channel;
-				const botVoiceChannel = client.player.voiceUtils.getConnection(
-					interaction.guild.id
-				).channel;
+				const queue = player.queues.get(interaction.guild.id);
 
-				if (listenerVoiceChannel && listenerVoiceChannel.id === botVoiceChannel.id) {
+				if (listenerVoiceChannel && listenerVoiceChannel.id === queue?.channel?.id) {
 					return await super.handle(interaction, client);
 				}
 			}
 
 			return await super.reply(interaction, { embeds: this.buildEmbedMessage() });
 		}
+
+		return super.handle(interaction, client);
 	}
 
 	private buildEmbedMessage(): EmbedBuilder[] {

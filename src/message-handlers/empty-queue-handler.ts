@@ -1,4 +1,5 @@
 import { type ChatInputCommandInteraction, type CacheType, EmbedBuilder, Colors } from 'discord.js';
+import { Player } from 'discord-player';
 import { type DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
@@ -13,9 +14,11 @@ export class EmptyQueueHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (interaction.isRepliable() && client.player && interaction.guild) {
-			const queue = client.player.getQueue(interaction.guild.id);
-			const isQueueEmpty = queue?.tracks.length === 0 && !queue?.playing;
+		if (interaction.isRepliable() && interaction.guild) {
+			const player = Player.singleton(client);
+			const queue = player.nodes.get(interaction.guild.id);
+			const isQueueEmpty = !queue?.tracks.size && !queue?.node.isPlaying();
+
 			if (!queue || isQueueEmpty) {
 				return await this.reply(interaction, { embeds: this.buildEmbedMessage() });
 			}

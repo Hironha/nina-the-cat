@@ -1,4 +1,4 @@
-import { type Track } from 'discord-player';
+import { Player, type Track } from 'discord-player';
 import {
 	type ChatInputCommandInteraction,
 	type CacheType,
@@ -22,10 +22,14 @@ export class NowPlayingHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (interaction.isRepliable() && interaction.guild && client.player) {
-			const queue = client.player.getQueue(interaction.guild.id);
-			if (queue?.playing) {
-				return await super.reply(interaction, { embeds: this.buildEmbedMessage(queue.current) });
+		if (interaction.isRepliable() && interaction.guild) {
+			const player = Player.singleton(client);
+			const queue = player.nodes.get(interaction.guild.id);
+
+			if (queue?.node.isPlaying() && queue.currentTrack) {
+				return await super.reply(interaction, {
+					embeds: this.buildEmbedMessage(queue.currentTrack),
+				});
 			}
 		}
 
@@ -39,19 +43,22 @@ export class NowPlayingHandler extends MessageHandler {
 			inline: false,
 		};
 
-		const requestedBy: APIEmbedField = {
-			name: 'Requested By',
-			value: track.requestedBy.username,
-			inline: false,
-		};
-
 		const message = new EmbedBuilder()
 			.setColor(Colors.Blue)
 			.setTitle('🐱 | Now Playing')
 			.setDescription(
 				`I'm currently playing the song ${bold(track.title)} by ${bold(track.author)}`
 			)
-			.addFields([duration, requestedBy]);
+			.addFields(duration);
+
+		if (track.requestedBy) {
+			const requestedBy: APIEmbedField = {
+				name: 'Requested By',
+				value: track.requestedBy.username,
+				inline: false,
+			};
+			message.addFields(requestedBy);
+		}
 
 		return [message];
 	}

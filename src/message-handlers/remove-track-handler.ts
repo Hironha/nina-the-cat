@@ -5,7 +5,7 @@ import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 } from 'discord.js';
-import { type Queue, type Track } from 'discord-player';
+import { Player, type Track } from 'discord-player';
 
 import { type DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
@@ -21,25 +21,23 @@ export class RemoveTrackHandler extends MessageHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 		client: DiscordClient<boolean>
 	): Promise<void> {
-		if (!interaction.isRepliable() || !interaction.guild || !client.player) {
+		if (!interaction.isRepliable() || !interaction.guild) {
 			return super.handle(interaction, client);
 		}
 
-		const queue = client.player.getQueue(interaction.guild.id);
+		const player = Player.singleton(client);
+		const queue = player.nodes.get(interaction.guild.id);
 		if (!queue) return super.handle(interaction, client);
 
 		const trackIndicator = interaction.options.getInteger('song');
-		const trackIndex = trackIndicator ? trackIndicator - 1 : null;
-		if (trackIndex === null || !this.validateTrackIndex(trackIndex)) {
+		const trackIndex = trackIndicator ? trackIndicator - 1 : 0;
+		const removedTrack = queue.node.remove(trackIndex);
+
+		if (trackIndex === null || !removedTrack) {
 			return super.reply(interaction, { content: '😿 | Invalid song!' });
 		}
 
-		const removedTrack = queue.remove(trackIndex);
 		return super.reply(interaction, { embeds: this.buildEmbedMessage(removedTrack) });
-	}
-
-	private validateTrackIndex(index: number): boolean {
-		return Number.isInteger(index) && index > 0;
 	}
 
 	private buildEmbedMessage(removedTrack: Track): EmbedBuilder[] {
