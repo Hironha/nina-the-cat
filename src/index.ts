@@ -3,6 +3,9 @@ import { Player } from 'discord-player';
 import { GatewayIntentBits } from 'discord.js';
 import { Environment } from '@utils/environment';
 
+import { clientReadyEvent } from '@events/client-ready';
+import { interactionCreateEvent } from '@events/interaction-create';
+
 import { audioTrackAddEvent } from '@player-events/audio-track-add';
 import { audioTracksAddEvent } from '@player-events/audio-tracks-add';
 import { emptyChannelEvent } from '@player-events/empty-channel';
@@ -10,7 +13,6 @@ import { emptyQueueEvent } from '@player-events/empty-queue';
 import { playerErrorEvent } from '@player-events/player-error';
 import { playerStartEvent } from '@player-events/player-start';
 
-import { EventUtils } from '@utils/event';
 import { DiscordClient } from '@utils/discord-client';
 import { createHandler } from '@utils/player-event';
 
@@ -23,8 +25,8 @@ async function main() {
 		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 	});
 
-	const events = await EventUtils.load();
-	EventUtils.attach(client, events);
+	client.on('ready', clientReadyEvent);
+	client.on('interactionCreate', interaction => interactionCreateEvent(interaction, client));
 
 	const player = new Player(client);
 	player.events.on('audioTrackAdd', createHandler(audioTrackAddEvent));

@@ -1,21 +1,17 @@
-import { ClientEvents, Events } from 'discord.js';
+import { type Client } from 'discord.js';
 import { CommandUtils } from '@utils/command';
 import { Environment } from '@utils/environment';
 
-import { type Event } from '@utils/event';
-import { type DiscordClient } from '@utils/discord-client';
+import { DiscordClient } from '@utils/discord-client';
 
-export class ClientReady implements Event {
-	public once = true;
-	public name: keyof ClientEvents = Events.ClientReady;
+export const clientReadyEvent = async (client: Client<true>): Promise<void> => {
+	if (!DiscordClient.isDiscordClient(client)) return;
 
-	async execute(client: DiscordClient): Promise<void> {
-		client.commands = await CommandUtils.load();
+	client.commands = await CommandUtils.load();
 
-		if (Environment.getPublishCommands()) {
-			await CommandUtils.publish(client.commands);
-		}
-
-		console.log('Ready to serve you, nya!');
+	if (Environment.getPublishCommands()) {
+		await CommandUtils.publish(client.commands);
 	}
-}
+
+	console.log('Ready to serve you, nya!');
+};

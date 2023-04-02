@@ -10,6 +10,10 @@ export class DiscordClient<Ready extends boolean = boolean> extends Client<Ready
 		this._commands = new Collection();
 	}
 
+	static isDiscordClient(client: unknown): client is DiscordClient {
+		return client instanceof DiscordClient;
+	}
+
 	get commands(): Collection<string, Command> {
 		return this._commands;
 	}
