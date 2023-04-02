@@ -1,8 +1,7 @@
 import { bold, Colors, EmbedBuilder, type TextBasedChannel, type APIEmbedField } from 'discord.js';
-import { GuildQueueEvent, type GuildQueue, type Track } from 'discord-player';
+import { type GuildQueue, type Track } from 'discord-player';
 
 import { intoChunk } from '@utils/chunk';
-import { type PlayerEvent } from '@utils/player-event';
 
 const mapTracksToEmbedFields = (tracks: Track[]): APIEmbedField[] => {
 	return tracks.map((track, index) => ({
@@ -20,12 +19,10 @@ const buildMessage = (tracks: Track[]): EmbedBuilder[] => {
 	});
 };
 
-const execute = async (queue: GuildQueue<TextBasedChannel>, tracks: Track[]): Promise<void> => {
+export const audioTracksAddEvent = async (
+	queue: GuildQueue<TextBasedChannel>,
+	tracks: Track[]
+): Promise<void> => {
 	const { metadata: textChannel } = queue;
 	await textChannel.send({ embeds: buildMessage(tracks) });
-};
-
-export const audioTracksAdd: PlayerEvent = {
-	name: GuildQueueEvent.audioTracksAdd,
-	execute,
 };

@@ -1,6 +1,5 @@
 import { Colors, EmbedBuilder, type TextBasedChannel } from 'discord.js';
-import { GuildQueueEvent, type GuildQueue } from 'discord-player';
-import { type PlayerEvent } from '@utils/player-event';
+import { type GuildQueue } from 'discord-player';
 
 const buildMessage = (): EmbedBuilder[] => {
 	const message = new EmbedBuilder()
@@ -11,13 +10,11 @@ const buildMessage = (): EmbedBuilder[] => {
 	return [message];
 };
 
-const execute = async (queue: GuildQueue<TextBasedChannel>): Promise<void> => {
+export const emptyQueueEvent = async (queue: GuildQueue<TextBasedChannel>): Promise<void> => {
 	const { metadata: textChannel } = queue;
 	await textChannel.send({ embeds: buildMessage() });
-	queue.delete();
-};
 
-export const emptyQueueEvent: PlayerEvent = {
-	name: GuildQueueEvent.emptyQueue,
-	execute,
+	if (!queue.deleted) {
+		queue.delete();
+	}
 };

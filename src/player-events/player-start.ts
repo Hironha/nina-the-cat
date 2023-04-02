@@ -1,6 +1,5 @@
 import { bold, Colors, EmbedBuilder, type TextBasedChannel } from 'discord.js';
-import { GuildQueueEvent, type GuildQueue, type Track } from 'discord-player';
-import { type PlayerEvent } from '@utils/player-event';
+import { type GuildQueue, type Track } from 'discord-player';
 
 const buildMessage = (trackTitle: string, channelName: string): EmbedBuilder[] => {
 	const message = new EmbedBuilder()
@@ -11,14 +10,12 @@ const buildMessage = (trackTitle: string, channelName: string): EmbedBuilder[] =
 	return [message];
 };
 
-const execute = async (queue: GuildQueue<TextBasedChannel>, track: Track): Promise<void> => {
+export const playerStartEvent = async (
+	queue: GuildQueue<TextBasedChannel>,
+	track: Track
+): Promise<void> => {
 	if (!queue.channel) return;
 
 	const { metadata: textChannel, channel: voiceChannel } = queue;
 	await textChannel.send({ embeds: buildMessage(track.title, voiceChannel.name) });
-};
-
-export const emptyQueueEvent: PlayerEvent = {
-	name: GuildQueueEvent.emptyQueue,
-	execute,
 };
