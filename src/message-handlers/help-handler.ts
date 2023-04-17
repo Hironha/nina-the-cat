@@ -5,9 +5,10 @@ import {
 	EmbedBuilder,
 	type ChatInputCommandInteraction,
 	type CacheType,
+	type Collection,
 } from 'discord.js';
 
-import { type Commands } from '@utils/command';
+import { type Command } from '@utils/command';
 import { DiscordClient } from '@utils/discord-client';
 import { MessageHandler, type MessageHandlerOptions } from '@utils/message-handler';
 
@@ -29,7 +30,7 @@ export class HelpHandler extends MessageHandler {
 		return super.handle(interaction, client);
 	}
 
-	private buildEmbedMessage(commands: Commands): EmbedBuilder[] {
+	private buildEmbedMessage(commands: Collection<string, Command>): EmbedBuilder[] {
 		const availableCommands = commands.map(command => ({
 			name: italic(bold(`/${command.name}`)),
 			value: command.description,
