@@ -14,7 +14,7 @@ export const emptyQueueEvent = async (queue: GuildQueue<TextBasedChannel>): Prom
 	const { metadata: textChannel } = queue;
 	await textChannel.send({ embeds: buildMessage() });
 
-	if (!queue.deleted) {
-		queue.delete();
-	}
+	// if (!queue.deleted) {
+	// 	queue.delete();
+	// }
 };

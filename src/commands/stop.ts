@@ -8,7 +8,7 @@ import { type DiscordClient } from '@utils/discord-client';
 import { type MessageHandlerOptions } from '@utils/message-handler';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 
-class Stop extends Command {
+export class Stop extends Command {
 	constructor() {
 		super();
 		this.setName('stop').setDescription("Stop playing the song and clears the song's queue");
@@ -29,5 +29,3 @@ class Stop extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Stop();

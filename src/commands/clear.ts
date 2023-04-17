@@ -7,7 +7,7 @@ import { EmptyQueueHandler } from '@message-handlers/empty-queue-handler';
 import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
 import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
 
-class Clear extends Command {
+export class Clear extends Command {
 	constructor() {
 		super();
 		this.setName('clear').setDescription('Clear all songs in queue');
@@ -28,5 +28,3 @@ class Clear extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Clear();

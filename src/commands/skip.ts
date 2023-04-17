@@ -9,7 +9,7 @@ import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-ha
 import { MessageHandlersChain } from '@utils/message-handler/message-handlers-chain';
 import { type MessageHandlerOptions } from '@utils/message-handler';
 
-class Skip extends Command {
+export class Skip extends Command {
 	constructor() {
 		super();
 		this.setName('skip')
@@ -34,5 +34,3 @@ class Skip extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Skip();

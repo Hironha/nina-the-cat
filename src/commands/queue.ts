@@ -6,7 +6,7 @@ import { MessageHandlersChain } from '@utils/message-handler/message-handlers-ch
 import { InVoiceChannelHandler } from '@message-handlers/in-voice-channel-handler';
 import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-handler';
 
-class Queue extends Command {
+export class Queue extends Command {
 	constructor() {
 		super();
 		this.setName('queue').setDescription('View the queue of current songs');
@@ -26,5 +26,3 @@ class Queue extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Queue();

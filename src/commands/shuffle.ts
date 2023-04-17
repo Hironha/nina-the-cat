@@ -8,7 +8,7 @@ import { MessageHandlersChain } from '@utils/message-handler/message-handlers-ch
 import { type DiscordClient } from '@utils/discord-client';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 
-class Shuffle extends Command {
+export class Shuffle extends Command {
 	constructor() {
 		super();
 		this.setName('shuffle').setDescription('Shuffle all songs in queue');
@@ -28,5 +28,3 @@ class Shuffle extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Shuffle();

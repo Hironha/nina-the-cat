@@ -15,24 +15,6 @@ function isCommand(data: unknown): data is Command {
 	return false;
 }
 export class CommandUtils {
-	static async load(): Promise<Command[]> {
-		const globPromise = promisify(glob);
-		const directoryFiles = `${getSRCPath()}/commands/*{.js,.ts}`;
-		const commandFiles = await globPromise(directoryFiles);
-
-		const commandPromises = commandFiles.map(async file => {
-			const importedFile = await import(file);
-			const command: unknown = importedFile.default;
-
-			if (!isCommand(command)) return null;
-			if (command.isDevOnly()) return Environment.isDevelopment() ? command : null;
-			return command;
-		});
-
-		const commands = await Promise.all(commandPromises);
-		return commands.filter((command): command is Command => Boolean(command));
-	}
-
 	static async publish(commands: Collection<string, Command>): Promise<void> {
 		const guildId = Environment.getGuildId();
 		const clientId = Environment.getClientId();

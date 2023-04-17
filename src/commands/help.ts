@@ -2,7 +2,7 @@ import { HelpHandler } from '@message-handlers/help-handler';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 import { type DiscordClient } from '@utils/discord-client';
 
-class Help extends Command {
+export class Help extends Command {
 	constructor() {
 		super();
 		this.setName('help').setDescription('List all available commands');
@@ -16,5 +16,3 @@ class Help extends Command {
 		await new HelpHandler({ method: 'edit-reply' }).handle(interaction, client);
 	}
 }
-
-export default new Help();

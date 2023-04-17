@@ -7,7 +7,7 @@ import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-ha
 
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 
-class NowPlaying extends Command {
+export class NowPlaying extends Command {
 	constructor() {
 		super();
 		this.setName('nowplaying').setDescription('Show information about the playing song');
@@ -28,5 +28,3 @@ class NowPlaying extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new NowPlaying();

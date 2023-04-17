@@ -6,7 +6,7 @@ import { type MessageHandlerOptions } from '@utils/message-handler';
 import { Command, type CacheType, type ChatInputCommandInteraction } from '@utils/command';
 import { type DiscordClient } from '@utils/discord-client';
 
-class Play extends Command {
+export class Play extends Command {
 	constructor() {
 		super();
 		this.setName('play')
@@ -32,5 +32,3 @@ class Play extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Play();

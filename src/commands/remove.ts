@@ -7,7 +7,7 @@ import { SameVoiceChannelHandler } from '@message-handlers/same-voice-channel-ha
 import { type DiscordClient } from '@utils/discord-client';
 import { Command, type ChatInputCommandInteraction } from '@utils/command';
 
-class Remove extends Command {
+export class Remove extends Command {
 	constructor() {
 		super();
 		this.setName('remove')
@@ -35,5 +35,3 @@ class Remove extends Command {
 			.handle(interaction, client);
 	}
 }
-
-export default new Remove();

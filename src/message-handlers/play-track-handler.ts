@@ -50,14 +50,15 @@ export class PlayTrackHandler extends MessageHandler {
 		if (!queue.connection) {
 			if (!voiceChannel.joinable) {
 				player.nodes.delete(guild.id);
-				return void interaction.followUp({
+				await interaction.followUp({
 					content: `I can't join the voice channel ${bold(voiceChannel.name)}`,
 				});
+				return;
 			}
-
 			const connectionSuccess = await queue.connect(voiceChannel).catch(() => null);
 			if (!connectionSuccess) {
-				return void interaction.followUp({ content: 'Could not join your voice channel!' });
+				await interaction.followUp({ content: 'Could not join your voice channel!' });
+				return;
 			}
 		}
 
@@ -68,11 +69,14 @@ export class PlayTrackHandler extends MessageHandler {
 			searchEngine: QueryType.AUTO,
 		});
 
-		if (searchResult.playlist) queue.addTrack(searchResult.tracks);
-		else queue.addTrack(searchResult.tracks[0]);
+		if (searchResult.playlist) {
+			queue.addTrack(searchResult.tracks);
+		} else {
+			queue.addTrack(searchResult.tracks[0]);
+		}
 
 		if (!queue.node.isPlaying()) {
-			await queue.node.play().catch(console.error);
+			await queue.node.play()
 		}
 	}
 
